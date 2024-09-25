@@ -67,7 +67,7 @@ set(LUA_LIBRARY_INCLUDE
 set(LUA_LIBRARY_PUBLIC_INCLUDE
         ${LUA_SOURCE_ROOT}/lauxlib.h
         ${LUA_SOURCE_ROOT}/lua.h
-        ${LUA_SOURCE_EXT_ROOT}/lua.hpp
+        ${LUA_SOURCE_ROOT}/lua.hpp
         ${LUA_SOURCE_ROOT}/luaconf.h
         ${LUA_SOURCE_ROOT}/lualib.h
 )
