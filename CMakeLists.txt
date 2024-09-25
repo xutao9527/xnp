@@ -19,6 +19,10 @@ set(CMAKE_PREFIX_PATH "${XXNP_INSTALL_PATH}")
 # 安装第三方库
 add_subdirectory(3rdparty)
 
-find_package(lua 5.4.7 QUIET)
+set(lua547_DIR "D:/codebase/cmakeProjects/xnp/install/Debug/lib/cmake/lua")
 
+#find_package(lua547 REQUIRED)
+#if (lua547_FOUND)
+#    message(${lua547_INCLUDE_DIRS})
+#endif ()
 #add_subdirectory(dealer)

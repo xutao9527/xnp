@@ -22,35 +22,21 @@ set(LUA_SOURCE_ROOT ${LUA_SOURCE_DIR}/lua-5.4.7/src)
 #================================
 include(lua_code_def.cmake)
 
-#================================
-# Packages.
-#================================
-set(LUA_LIBS)
-if (UNIX AND NOT APPLE)
-    include(CheckLibraryExists)
-    check_library_exists(m sin "" HAVE_LIB_M)
-    if (HAVE_LIB_M)
-        list(APPEND LUA_LIBS m)
-    endif()
-endif()
 
 #================================
 # Lua library.
 #================================
 source_group("include" FILES ${LUA_LIBRARY_INCLUDE})
 source_group("source" FILES ${LUA_LIBRARY_SOURCE})
-add_library(lua_lib ${LUA_LIBRARY_INCLUDE} ${LUA_LIBRARY_SOURCE})
-target_include_directories(lua_lib PUBLIC
+add_library(lua547 ${LUA_LIBRARY_INCLUDE} ${LUA_LIBRARY_SOURCE})
+target_include_directories(lua547 PUBLIC
         $<BUILD_INTERFACE:${LUA_SOURCE_ROOT}>
         $<INSTALL_INTERFACE:include>
 )
-if (UNIX AND NOT APPLE)
-    target_link_libraries(lua_lib PUBLIC ${LUA_LIBS})
-endif()
-target_compile_features(lua_lib PRIVATE cxx_std_20)
-set_target_properties(lua_lib PROPERTIES DEBUG_POSTFIX "d")
-add_library(lua::lua ALIAS lua_lib)
-set_target_properties(lua_lib PROPERTIES FOLDER "lua")
+target_compile_features(lua547 PRIVATE cxx_std_20)
+set_target_properties(lua547 PROPERTIES DEBUG_POSTFIX "d")
+add_library(lua::lua ALIAS lua547)
+set_target_properties(lua547 PROPERTIES FOLDER "lua")
 
 #================================
 # Lua compiler.
@@ -58,7 +44,7 @@ set_target_properties(lua_lib PROPERTIES FOLDER "lua")
 if (LUA_BUILD_COMPILER)
     source_group("source" FILES ${LUA_COMPILER_SOURCE})
     add_executable(luac ${LUA_COMPILER_SOURCE})
-    target_link_libraries(luac PRIVATE lua_lib)
+    target_link_libraries(luac PRIVATE lua547)
     set_target_properties(luac PROPERTIES FOLDER "lua")
 endif()
 
@@ -68,7 +54,7 @@ endif()
 if (LUA_BUILD_INTERPRETER)
     source_group("source" FILES ${LUA_INTERPRETER_SOURCE})
     add_executable(lua ${LUA_INTERPRETER_SOURCE})
-    target_link_libraries(lua PRIVATE lua_lib)
+    target_link_libraries(lua PRIVATE lua547)
     set_target_properties(lua PROPERTIES FOLDER "lua")
 endif()
 
@@ -76,61 +62,48 @@ endif()
 # Lua interpreter
 #================================
 if (LUA_INSTALL_TARGET)
-    install(TARGETS lua_lib
-            EXPORT lua_lib
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION lib
-            INCLUDES DESTINATION include
-    )
-
     include(CMakePackageConfigHelpers)
     include(GNUInstallDirs)
+
+    # 安装目标库
+    install(TARGETS lua547
+            EXPORT lua547Targets                           # 用于导出目标
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}    # 安装共享库到 lib 目录
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}    # 安装静态库到 lib 目录
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}    # 安装可执行文件到 bin 目录（Windows 下的 DLL）
+            INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}  # 安装头文件到 include 目录
+    )
+
+    # 安装头文件
+    install(FILES ${LUA_LIBRARY_PUBLIC_INCLUDE}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/lua
+    )
+
+    # 安装导出文件
+    install(EXPORT lua547Targets
+            FILE lua547Targets.cmake
+            NAMESPACE lua::
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lua
+    )
+
+    # 生成 CMake 包配置文件
     write_basic_package_version_file(
-            "${PROJECT_BINARY_DIR}/luaConfigVersion.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/lua547ConfigVersion.cmake"
             VERSION ${PACKAGE_VERSION}
             COMPATIBILITY ExactVersion
     )
 
-    install(EXPORT lua_lib
-            FILE luaTargets.cmake
-            NAMESPACE lua::
-            DESTINATION lib/cmake/lua
+    configure_package_config_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/lua547Config.cmake.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/lua547Config.cmake"
+            INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lua
     )
 
+    # 安装配置文件
     install(FILES
-            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/luaConfig.cmake"
-            "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Findlua.cmake"
-            "${CMAKE_CURRENT_BINARY_DIR}/luaConfigVersion.cmake"
-            DESTINATION lib/cmake/lua
+            "${CMAKE_CURRENT_BINARY_DIR}/lua547Config.cmake"
+            "${CMAKE_CURRENT_BINARY_DIR}/lua547ConfigVersion.cmake"
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lua
     )
 
-    install(FILES
-            ${LUA_LIBRARY_PUBLIC_INCLUDE}
-            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/lua"
-    )
-
-    if (MSVC)
-        set(PDB_DIR_SUFFIX
-                "$<$<CONFIG:Debug>:Debug>$<$<CONFIG:RelWithDebInfo>:RelWithDebInfo>")
-        set(LIB_SUFFIX "$<$<CONFIG:Debug>:d>")
-
-        set(PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${PDB_DIR_SUFFIX}")
-        set(PDB_NAME "lua_lib${LIB_SUFFIX}.pdb")
-        install(FILES
-                "${PDB_OUTPUT_DIRECTORY}/${PDB_NAME}"
-                DESTINATION lib OPTIONAL)
-    endif()
-
-    if (LUA_BUILD_COMPILER)
-        install(TARGETS luac
-                DESTINATION bin
-        )
-    endif()
-
-    if (LUA_BUILD_INTERPRETER)
-        install(TARGETS lua
-                DESTINATION bin
-        )
-    endif()
 endif()
