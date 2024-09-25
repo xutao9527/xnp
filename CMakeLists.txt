@@ -18,12 +18,8 @@ set(CMAKE_PREFIX_PATH "${XXNP_INSTALL_PATH}")
 
 # 安装第三方库
 add_subdirectory(3rdparty)
-#find_package(Lua REQUIRED CONFIG)
-#message(${LUA_LIBRARY})
-#message(${LUA_INCLUDE_DIR})
-
 
 # 核心
-#add_subdirectory(core)
+add_subdirectory(core)
 
 #add_subdirectory(dealer)

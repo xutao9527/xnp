@@ -15,9 +15,4 @@ else ()
     add_subdirectory(wxWidgets-3.2.6)
 endif ()
 
-# 检查lua-5.4.7是否已经安装
-if (EXISTS ${XXNP_INSTALL_PATH}/lib/gcc_x64_lib/liblua_staticd.a OR EXISTS "${XXNP_INSTALL_PATH}/lib/gcc_x64_lib/liblua_static.a")
-    message(STATUS "******************** lua is already installed ********************")
-else ()
-    add_subdirectory(Lua)
-endif ()
+add_subdirectory(lua)
