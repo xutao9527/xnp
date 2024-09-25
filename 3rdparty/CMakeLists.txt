@@ -15,14 +15,13 @@ get_property(XXNP_INSTALL_PATH GLOBAL PROPERTY XXNP_INSTALL_PATH)
 #    add_subdirectory(wxWidgets-3.2.6)
 #endif ()
 
-add_subdirectory(lua)
+#add_subdirectory(lua)
 
-#set(lua547_DIR "${XXNP_INSTALL_PATH}/lib/cmake/lua")
-#find_package(Lua REQUIRED CONFIG)
-#if(lua547_FOUND)
-#    message(STATUS "Found lua547 package!")
-#    message(STATUS "Include Directories: ${lua_INCLUDE_DIRS}")
-#    message(STATUS "Libraries: ${lua_LIBRARIES}")
-#else()
-#    message(FATAL_ERROR "Could not find lua547 package.")
-#endif()
+find_package(Lua REQUIRED CONFIG)
+if(Lua_FOUND)
+    message(STATUS "Found Lua package!")
+else()
+    message(FATAL_ERROR "Could not find Lua package.")
+endif()
+
+
