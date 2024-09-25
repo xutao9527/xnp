@@ -19,4 +19,6 @@ set(CMAKE_PREFIX_PATH "${XXNP_INSTALL_PATH}")
 # 安装第三方库
 add_subdirectory(3rdparty)
 
+find_package(lua 5.4.7 QUIET)
+
 #add_subdirectory(dealer)

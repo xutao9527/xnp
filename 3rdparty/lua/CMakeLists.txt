@@ -1,3 +1,6 @@
+#================================
+# Project setup.
+#================================
 cmake_minimum_required(VERSION 3.24)
 project(lua VERSION 5.4.7 LANGUAGES C CXX)
 
