@@ -1,11 +1,8 @@
-
-
 # 检查wxWidgets-3.2.6是否已经安装
 if (EXISTS ${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib/libwxbase32ud.a OR EXISTS "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib/libwxbase32u.a")
     message(STATUS "******************** wxWidgets is already installed ********************")
-#    set(wxWidgets_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-#    set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
-#    find_package(wxWidgets REQUIRED)
+    set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
+    find_package(wxWidgets REQUIRED)
 else ()
 #    set(wxBUILD_SAMPLES All)
     set(wxBUILD_SHARED OFF)
@@ -14,6 +11,8 @@ else ()
     add_subdirectory(wxWidgets-3.2.6)
 endif ()
 
-set(wxWidgets_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
-find_package(wxWidgets REQUIRED)
+
+#add_subdirectory(lua)
+
+find_package(Lua REQUIRED)
+message( ${LUA_LIBRARIES})
