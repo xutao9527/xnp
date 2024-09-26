@@ -17,6 +17,6 @@ set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
 add_subdirectory(3rdparty)
 
 # 核心
-#add_subdirectory(core)
+add_subdirectory(dealer)
 
 
