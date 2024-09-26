@@ -1,11 +1,10 @@
-# 设置安装目录
-get_property(XXNP_INSTALL_PATH GLOBAL PROPERTY XXNP_INSTALL_PATH)
+
 
 # 检查wxWidgets-3.2.6是否已经安装
-if (EXISTS ${XXNP_INSTALL_PATH}/lib/gcc_x64_lib/libwxbase32ud.a OR EXISTS "${XXNP_INSTALL_PATH}/lib/gcc_x64_lib/libwxbase32u.a")
+if (EXISTS ${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib/libwxbase32ud.a OR EXISTS "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib/libwxbase32u.a")
     message(STATUS "******************** wxWidgets is already installed ********************")
-#    set(wxWidgets_ROOT_DIR "${XXNP_INSTALL_PATH}")
-#    set(wxWidgets_LIB_DIR "${XXNP_INSTALL_PATH}/lib/gcc_x64_lib")
+#    set(wxWidgets_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+#    set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
 #    find_package(wxWidgets REQUIRED)
 else ()
 #    set(wxBUILD_SAMPLES All)
@@ -15,4 +14,6 @@ else ()
     add_subdirectory(wxWidgets-3.2.6)
 endif ()
 
-add_subdirectory(lua)
+set(wxWidgets_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
+find_package(wxWidgets REQUIRED)
