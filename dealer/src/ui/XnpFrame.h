@@ -2,7 +2,7 @@
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include <wx/wx.h>
+    #include <wx/wx.h>
 #endif
 
 
@@ -13,13 +13,21 @@ public:
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
     }
+
 protected:
-    void OnPaint(wxPaintEvent& event);
+    void OnPaint(wxPaintEvent &event)
+    {
+        // 获取当前窗口设备上下文
+        wxPaintDC dc(this);
+        HDC hdc = dc.GetHDC();
+        dc.DrawText("Hello, world!", 20, 20);
+
+    }
+
+
+
 private:
-    //将类加入到RTTI中
 DECLARE_DYNAMIC_CLASS(XnpFrame)
-    //定义事件表
+
 DECLARE_EVENT_TABLE()
 };
-
-
