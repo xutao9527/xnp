@@ -50,12 +50,14 @@ public:
 
     void Loop(){
         Rml::Context* context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height));
+        Rml::Debugger::Initialise(context);
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
+
         document->Show();
         bool running = true;
         while (running)
         {
-            //running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
+            running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
             context->Update();
             Backend::BeginFrame();
             context->Render();
