@@ -236,7 +236,7 @@ void Backend::RequestExit()
 
 void Backend::BeginFrame()
 {
-    RMLUI_ASSERT(data);
+    //RMLUI_ASSERT(data);
     data->render_interface.BeginFrame();
 }
 
