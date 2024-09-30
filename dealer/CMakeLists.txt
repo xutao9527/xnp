@@ -7,7 +7,7 @@ find_package(wxWidgets REQUIRED COMPONENTS core base)
 find_package(RmlUi REQUIRED)
 find_package(OpenGL REQUIRED)
 
-file(COPY "${PROJECT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${PROJECT_SOURCE_DIR}/resources" DESTINATION "${CMAKE_BINARY_DIR}")
 
 set(SHELL_SOURCES
         src/shell/Shell.cpp
