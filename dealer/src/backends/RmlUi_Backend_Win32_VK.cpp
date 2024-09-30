@@ -326,23 +326,23 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
 static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize,HWND hwnd)
 {
     // Fill out the window class struct.
-    WNDCLASSW window_class;
-    window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    window_class.lpfnWndProc = &Backend::WindowProcedureHandler; // Attach our local event handler.
-    window_class.cbClsExtra = 0;
-    window_class.cbWndExtra = 0;
-    window_class.hInstance = instance_handle;
-    window_class.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
-    window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    window_class.hbrBackground = nullptr;
-    window_class.lpszMenuName = nullptr;
-    window_class.lpszClassName = name.data();
-
-    if (!RegisterClassW(&window_class))
-    {
-        Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to register window class");
-        return nullptr;
-    }
+    // WNDCLASSW window_class;
+    // window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    // window_class.lpfnWndProc = &Backend::WindowProcedureHandler; // Attach our local event handler.
+    // window_class.cbClsExtra = 0;
+    // window_class.cbWndExtra = 0;
+    // window_class.hInstance = instance_handle;
+    // window_class.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+    // window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    // window_class.hbrBackground = nullptr;
+    // window_class.lpszMenuName = nullptr;
+    // window_class.lpszClassName = name.data();
+    //
+    // if (!RegisterClassW(&window_class))
+    // {
+    //     Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to register window class");
+    //     return nullptr;
+    // }
 
     // HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
     //                                      name.data(),                                                                // Window class name.
@@ -356,33 +356,33 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
         return nullptr;
     }
 
-    UINT window_dpi = GetWindowDpi(window_handle);
-    inout_width = (inout_width * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
-    inout_height = (inout_height * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
-
-    DWORD style = (allow_resize ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX));
-    DWORD extended_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-
-    // Adjust the window size to take the edges into account.
-    RECT window_rect;
-    window_rect.top = 0;
-    window_rect.left = 0;
-    window_rect.right = inout_width;
-    window_rect.bottom = inout_height;
-    if (has_dpi_support)
-        procAdjustWindowRectExForDpi(&window_rect, style, FALSE, extended_style, window_dpi);
-    else
-        AdjustWindowRectEx(&window_rect, style, FALSE, extended_style);
-
-    SetWindowLong(window_handle, GWL_EXSTYLE, extended_style);
-    SetWindowLong(window_handle, GWL_STYLE, style);
-
-    // Resize the window and center it on the screen.
-    Rml::Vector2i screen_size = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
-    Rml::Vector2i window_size = {int(window_rect.right - window_rect.left), int(window_rect.bottom - window_rect.top)};
-    Rml::Vector2i window_pos = Rml::Math::Max((screen_size - window_size) / 2, Rml::Vector2i(0));
-
-    SetWindowPos(window_handle, HWND_TOP, window_pos.x, window_pos.y, window_size.x, window_size.y, SWP_NOACTIVATE);
+    // UINT window_dpi = GetWindowDpi(window_handle);
+    // inout_width = (inout_width * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
+    // inout_height = (inout_height * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
+    //
+    // DWORD style = (allow_resize ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX));
+    // DWORD extended_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+    //
+    // // Adjust the window size to take the edges into account.
+    // RECT window_rect;
+    // window_rect.top = 0;
+    // window_rect.left = 0;
+    // window_rect.right = inout_width;
+    // window_rect.bottom = inout_height;
+    // if (has_dpi_support)
+    //     procAdjustWindowRectExForDpi(&window_rect, style, FALSE, extended_style, window_dpi);
+    // else
+    //     AdjustWindowRectEx(&window_rect, style, FALSE, extended_style);
+    //
+    // SetWindowLong(window_handle, GWL_EXSTYLE, extended_style);
+    // SetWindowLong(window_handle, GWL_STYLE, style);
+    //
+    // // Resize the window and center it on the screen.
+    // Rml::Vector2i screen_size = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
+    // Rml::Vector2i window_size = {int(window_rect.right - window_rect.left), int(window_rect.bottom - window_rect.top)};
+    // Rml::Vector2i window_pos = Rml::Math::Max((screen_size - window_size) / 2, Rml::Vector2i(0));
+    //
+    // SetWindowPos(window_handle, HWND_TOP, window_pos.x, window_pos.y, window_size.x, window_size.y, SWP_NOACTIVATE);
 
     return window_handle;
 }
