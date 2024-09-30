@@ -2,8 +2,8 @@
 
 
 int XnpRWindow::show() {
-    const int window_width = 1024;
-    const int window_height = 768;
+    const int window_width = 512;
+    const int window_height = 384;
 
     // Initializes the shell which provides common functionality used by the included samples.
     if (!Shell::Initialize())
