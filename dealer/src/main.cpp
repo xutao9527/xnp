@@ -20,10 +20,10 @@ public:
 
         other();
 
-        auto *xnpFrame = new XnpFrame();
-        xnpFrame->SetSize(500, 320);
-        xnpFrame->Center();
-        xnpFrame->Show();
+        // auto *xnpFrame = new XnpFrame();
+        // xnpFrame->SetSize(500, 320);
+        // xnpFrame->Center();
+        // xnpFrame->Show();
         return true;
     }
 
