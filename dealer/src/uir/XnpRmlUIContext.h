@@ -16,15 +16,18 @@
 class XnpRmlUIContext: public std::enable_shared_from_this<XnpRmlUIContext>
 {
 private:
-     int window_width = 1024;
-     int window_height = 768;
+    int window_width = 1024;
+    int window_height = 768;
+
 
 public:
     XnpRmlUIContext(){
         wxLogInfo(L"构造~~~~");
     }
 
-    void Init(){}
+    void Init(){
+
+    }
 
     void Run(){
         auto self = shared_from_this();
@@ -32,7 +35,7 @@ public:
             window_width = 1024;
             window_height = 768;
             Shell::Initialize();
-            Backend::Initialize("Load Document Sample", window_width, window_height, true);
+            Backend::Initialize("wx", window_width, window_height, true);
             Rml::SetSystemInterface(Backend::GetSystemInterface());
             Rml::SetRenderInterface(Backend::GetRenderInterface());
             Rml::Initialise();
@@ -43,7 +46,6 @@ public:
     }
 
     void Loop(){
-
         Rml::Context* context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height));
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
         document->Show();

@@ -96,74 +96,48 @@ static Rml::UniquePtr<BackendData> data;
 
 bool Backend::Initialize(const char* window_name, int width, int height, bool allow_resize)
 {
-	RMLUI_ASSERT(!data);
-
 	const std::wstring name = RmlWin32::ConvertToUTF16(Rml::String(window_name));
-
 	data = Rml::MakeUnique<BackendData>();
-
 	data->instance_handle = GetModuleHandle(nullptr);
 	data->instance_name = name;
-
 	InitializeDpiSupport();
 
-	// Initialize the window but don't show it yet.
 	HWND window_handle = InitializeWindow(data->instance_handle, name, width, height, allow_resize);
-	if (!window_handle)
-		return false;
 
 	data->window_handle = window_handle;
-
 	Rml::Vector<const char*> extensions;
 	extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 	extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-	if (!data->render_interface.Initialize(std::move(extensions), CreateVulkanSurface))
-	{
-		Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to initialize Vulkan render interface");
-		::CloseWindow(window_handle);
-		data.reset();
-		return false;
-	}
+	data->render_interface.Initialize(std::move(extensions), CreateVulkanSurface);
 
 	data->system_interface.SetWindow(window_handle);
 	data->render_interface.SetViewport(width, height);
 
-	// Now we are ready to show the window.
 	::ShowWindow(window_handle, SW_SHOW);
 	::SetForegroundWindow(window_handle);
 	::SetFocus(window_handle);
-
-	// Provide a backend-specific text input handler to manage the IME.
 	Rml::SetTextInputHandler(&data->text_input_method_editor);
-
 	return true;
 }
 
 void Backend::Shutdown()
 {
 	RMLUI_ASSERT(data);
-
-	// As we forcefully override the global text input handler, we must reset it before the data is destroyed to avoid any potential use-after-free.
 	if (Rml::GetTextInputHandler() == &data->text_input_method_editor)
 		Rml::SetTextInputHandler(nullptr);
-
 	data->render_interface.Shutdown();
-
 	::DestroyWindow(data->window_handle);
 	::UnregisterClassW((LPCWSTR)data->instance_name.data(), data->instance_handle);
-
 	data.reset();
 }
 
 Rml::SystemInterface* Backend::GetSystemInterface()
 {
-	RMLUI_ASSERT(data);
 	return &data->system_interface;
 }
 
 Rml::RenderInterface* Backend::GetRenderInterface()
 {
-	RMLUI_ASSERT(data);
 	return &data->render_interface;
 }
 
@@ -183,8 +157,6 @@ static bool NextEvent(MSG& message, UINT timeout)
 bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save)
 {
 	RMLUI_ASSERT(data && context);
-
-	// The initial window size may have been affected by system DPI settings, apply the actual pixel size and dp-ratio to the context.
 	if (data->context_dimensions_dirty)
 	{
 		data->context_dimensions_dirty = false;
@@ -192,7 +164,6 @@ bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_call
 		context->SetDimensions(data->window_dimensions);
 		context->SetDensityIndependentPixelRatio(dp_ratio);
 	}
-
 	data->context = context;
 	data->key_down_callback = key_down_callback;
 
@@ -207,48 +178,34 @@ bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_call
 			TranslateMessage(&message);
 			DispatchMessage(&message);
 		}
-
-		// In some situations the swapchain may become invalid, such as when the window is minimized. In this state the renderer cannot accept any
-		// render calls. Since we don't have full control over the main loop here we may risk calls to Context::Render if we were to return. Instead,
-		// we trap the application inside this loop until we are able to recreate the swapchain and render again.
 		if (!data->render_interface.IsSwapchainValid())
 			data->render_interface.RecreateSwapchain();
 
 		has_message = NextEvent(message, 0);
 	}
-
 	data->context = nullptr;
 	data->key_down_callback = nullptr;
-
 	return data->running;
 }
 
 void Backend::RequestExit()
 {
-	RMLUI_ASSERT(data);
 	data->running = false;
 }
 
 void Backend::BeginFrame()
 {
-	RMLUI_ASSERT(data);
 	data->render_interface.BeginFrame();
 }
 
 void Backend::PresentFrame()
 {
-	RMLUI_ASSERT(data);
 	data->render_interface.EndFrame();
-
-	// Optional, used to mark frames during performance profiling.
-	RMLUI_FrameMark;
 }
 
 // Local event handler for window and input events.
 static LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
 {
-	RMLUI_ASSERT(data);
-
 	switch (message)
 	{
 	case WM_CLOSE:
