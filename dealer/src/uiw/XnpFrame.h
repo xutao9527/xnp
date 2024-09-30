@@ -8,6 +8,7 @@
 
 #endif
 
+#include "event/XnpEventHandler.h"
 #include "XnpRmlUIContext.h"
 
 class XnpFrame : public wxFrame
@@ -18,9 +19,11 @@ public:
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
 
-        std::shared_ptr<XnpRmlUIContext> x = std::make_shared<XnpRmlUIContext>();
-        x->Init("wx", 512, 384, GetHWND());
-        x->Run();
+        // std::shared_ptr<XnpRmlUIContext> x = std::make_shared<XnpRmlUIContext>();
+        // x->Init("wx", 512, 384, GetHWND());
+        // x->Run();
+        XnpEventHandler* handler = new XnpEventHandler();
+        this->PushEventHandler(handler);
     }
 
 

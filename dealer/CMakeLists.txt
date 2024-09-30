@@ -25,6 +25,7 @@ set(BACKENDS_SOURCES
         src/backends/RmlUi_Include_Windows.h
         src/backends/RmlUi_Backend_Win32_VK.cpp
         src/backends/RmlUi_Backend.h
+
 )
 
 set(CODE_SOURCES
@@ -33,6 +34,8 @@ set(CODE_SOURCES
         src/uiw/XnpFrame.cpp
         src/uir/XnpRmlUIContext.h
         src/uir/XnpRmlUIContext.cpp
+        src/event/XnpEventHandler.h
+        src/event/XnpEventHandler.cpp
 )
 
 add_executable(${PROJECT_NAME}
