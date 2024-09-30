@@ -13,17 +13,21 @@
 
 class XnpFrame : public wxFrame
 {
-
+    XnpEventHandler* eventHandler;
 public:
     XnpFrame() : wxFrame(nullptr, wxID_ANY, "wx")
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
-
         // std::shared_ptr<XnpRmlUIContext> x = std::make_shared<XnpRmlUIContext>();
         // x->Init("wx", 512, 384, GetHWND());
         // x->Run();
-        XnpEventHandler* handler = new XnpEventHandler();
-        this->PushEventHandler(handler);
+        eventHandler = new XnpEventHandler();
+        this->PushEventHandler(eventHandler);
+
+    }
+
+    ~XnpFrame() override {
+        this->RemoveEventHandler(eventHandler);
     }
 
 
