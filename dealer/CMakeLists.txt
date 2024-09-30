@@ -31,6 +31,8 @@ set(CODE_SOURCES
         src/main.cpp
         src/uiw/XnpFrame.h
         src/uiw/XnpFrame.cpp
+        src/uir/XnpRWindow.h
+        src/uir/XnpRWindow.cpp
 )
 
 add_executable(${PROJECT_NAME}
