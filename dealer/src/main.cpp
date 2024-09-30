@@ -22,7 +22,7 @@ public:
         logWindow->GetFrame()->SetPosition(wxPoint(10,10));
 
         auto *xnpFrame = new XnpFrame();
-        xnpFrame->SetSize(500, 320);
+        xnpFrame->SetSize(512, 384);
         xnpFrame->Center();
         xnpFrame->Show();
         return true;

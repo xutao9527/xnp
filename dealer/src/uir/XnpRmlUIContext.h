@@ -38,7 +38,7 @@ public:
         auto self = shared_from_this();
         std::thread runThread([=]() {
             Shell::Initialize();
-            Backend::Initialize(window_title.c_str(), window_width, window_height, true);
+            Backend::Initialize(window_title.c_str(), window_width, window_height, true ,window_handle);
             Rml::SetSystemInterface(Backend::GetSystemInterface());
             Rml::SetRenderInterface(Backend::GetRenderInterface());
             Rml::Initialise();
@@ -56,6 +56,7 @@ public:
         while (running)
         {
             running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
+            //wxLogInfo(L"绘制!");
             context->Update();
             Backend::BeginFrame();
             context->Render();
