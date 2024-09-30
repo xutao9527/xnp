@@ -29,8 +29,8 @@ set(BACKENDS_SOURCES
 
 set(CODE_SOURCES
         src/main.cpp
-        src/ui/XnpFrame.h
-        src/ui/XnpFrame.cpp
+        src/uiw/XnpFrame.h
+        src/uiw/XnpFrame.cpp
 )
 
 add_executable(${PROJECT_NAME}
@@ -50,6 +50,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC src)
-target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
+target_include_directories(${PROJECT_NAME} PUBLIC src/uir)
+target_include_directories(${PROJECT_NAME} PUBLIC src/uiw)
 target_include_directories(${PROJECT_NAME} PUBLIC src/shell)
 target_include_directories(${PROJECT_NAME} PUBLIC src/backends)
