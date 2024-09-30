@@ -16,6 +16,17 @@ set(SHELL_SOURCES
         src/shell/ShellFileInterface.h
 )
 
+set(BACKENDS_SOURCES
+        src/backends/RmlUi_Platform_Win32.h
+        src/backends/RmlUi_Platform_Win32.cpp
+        src/backends/RmlUi_Renderer_VK.h
+        src/backends/RmlUi_Renderer_VK.cpp
+        src/backends/RmlUi_Include_Vulkan.h
+        src/backends/RmlUi_Include_Windows.h
+        src/backends/RmlUi_Backend_Win32_VK.cpp
+        src/backends/RmlUi_Backend.h
+)
+
 set(CODE_SOURCES
         src/main.cpp
         src/ui/XnpFrame.h
@@ -24,6 +35,7 @@ set(CODE_SOURCES
 
 add_executable(${PROJECT_NAME}
         ${SHELL_SOURCES}
+        ${BACKENDS_SOURCES}
         ${CODE_SOURCES}
         resources.rc)
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
@@ -31,8 +43,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         ${wxWidgets_LIBRARIES}
         RmlUi::RmlUi
         OpenGL::GL
+        imm32
         -static
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
+target_include_directories(${PROJECT_NAME} PUBLIC src/shell)
+target_include_directories(${PROJECT_NAME} PUBLIC src/backends)
