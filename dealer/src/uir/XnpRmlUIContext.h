@@ -55,8 +55,7 @@ public:
         bool running = true;
         while (running)
         {
-            running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
-            //wxLogInfo(L"绘制!");
+            //running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
             context->Update();
             Backend::BeginFrame();
             context->Render();

@@ -366,12 +366,12 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
         return nullptr;
     }
 
-    HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-                                         name.data(),                                                                // Window class name.
-                                         name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
-                                         0, 0,                                                                       // Window size.
-                                         nullptr, nullptr, instance_handle, nullptr);
-
+    // HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
+    //                                      name.data(),                                                                // Window class name.
+    //                                      name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
+    //                                      0, 0,                                                                       // Window size.
+    //                                      nullptr, nullptr, instance_handle, nullptr);
+    HWND window_handle = hwnd;
     if (!window_handle)
     {
         Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
