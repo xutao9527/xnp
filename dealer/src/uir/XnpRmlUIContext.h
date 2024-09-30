@@ -7,35 +7,38 @@
 
 #include <thread>
 #include <memory>
+#include <utility>
+#include <RmlUi_Backend.h>
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
-#include <RmlUi_Backend.h>
 #include <Shell.h>
 
 
 class XnpRmlUIContext: public std::enable_shared_from_this<XnpRmlUIContext>
 {
 private:
-    int window_width = 1024;
-    int window_height = 768;
-
+    std::string window_title;
+    int window_width;
+    int window_height;
+    HWND window_handle;
 
 public:
     XnpRmlUIContext(){
         wxLogInfo(L"构造~~~~");
     }
 
-    void Init(){
-
+    void Init(std::string title,int width,int height,HWND hwnd){
+        window_title = std::move(title);
+        window_width = width;
+        window_height = height;
+        window_handle = hwnd;
     }
 
     void Run(){
         auto self = shared_from_this();
         std::thread runThread([=]() {
-            window_width = 1024;
-            window_height = 768;
             Shell::Initialize();
-            Backend::Initialize("wx", window_width, window_height, true);
+            Backend::Initialize(window_title.c_str(), window_width, window_height, true);
             Rml::SetSystemInterface(Backend::GetSystemInterface());
             Rml::SetRenderInterface(Backend::GetRenderInterface());
             Rml::Initialise();

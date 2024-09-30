@@ -17,17 +17,9 @@ class XnpApp : public wxApp
 public:
     bool OnInit() override
     {
-        // Shell::Initialize();
-        // Rml::Initialise();
-        // Shell::LoadFonts();
-
         auto * logWindow = new wxLogWindow(nullptr, "Log Window", true, false);
         logWindow->GetFrame()->SetSize(500,400);
         logWindow->GetFrame()->SetPosition(wxPoint(10,10));
-
-        std::shared_ptr<XnpRmlUIContext> x = std::make_shared<XnpRmlUIContext>();
-        x->Init();
-        x->Run();
 
         auto *xnpFrame = new XnpFrame();
         xnpFrame->SetSize(500, 320);

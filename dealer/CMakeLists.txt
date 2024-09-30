@@ -31,8 +31,6 @@ set(CODE_SOURCES
         src/main.cpp
         src/uiw/XnpFrame.h
         src/uiw/XnpFrame.cpp
-        src/uir/XnpRWindow.h
-        src/uir/XnpRWindow.cpp
         src/uir/XnpRmlUIContext.h
         src/uir/XnpRmlUIContext.cpp
 )
