@@ -16,7 +16,7 @@ set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
 # 安装第三方库
 add_subdirectory(3rdparty)
 
-# 核心
+
 add_subdirectory(dealer)
 
 
