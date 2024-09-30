@@ -1,14 +1,10 @@
 
-// #include "XnpFrame.h"
-// #include "XnpRWindow.h"
-// #include "XnpRmlUIContext.h"
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
 
-#include "XnpRmlUIContext.h"
 #include "XnpFrame.h"
 
 class XnpApp : public wxApp
