@@ -18,7 +18,7 @@ public:
     bool OnInit() override
     {
         auto * logWindow = new wxLogWindow(nullptr, "Log Window", true, false);
-        logWindow->GetFrame()->SetSize(500,400);
+        logWindow->GetFrame()->SetSize(700,400);
         logWindow->GetFrame()->SetPosition(wxPoint(10,10));
 
         auto *xnpFrame = new XnpFrame();

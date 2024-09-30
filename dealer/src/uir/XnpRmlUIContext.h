@@ -5,13 +5,14 @@
 #include <wx/wx.h>
 #endif
 
+#include <RmlUi_Backend.h>
 #include <thread>
 #include <memory>
 #include <utility>
-#include <RmlUi_Backend.h>
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger.h>
 #include <Shell.h>
+#include <atomic>
 
 
 class XnpRmlUIContext: public std::enable_shared_from_this<XnpRmlUIContext>
@@ -21,7 +22,7 @@ private:
     int window_width;
     int window_height;
     HWND window_handle;
-
+    std::atomic<bool> m_running;
 public:
     XnpRmlUIContext(){
         wxLogInfo(L"构造~~~~");
@@ -32,6 +33,16 @@ public:
         window_width = width;
         window_height = height;
         window_handle = hwnd;
+    }
+
+    LRESULT EventHandler(UINT message, WXWPARAM wParam, WXLPARAM lParam){
+        if(m_running){
+            //if(message!=70&&message!=36&&message!=131&&message!=71){
+                return Backend::WindowProcedureHandler(window_handle, message, wParam, lParam);
+            //}
+
+        }
+        return 0;
     }
 
     void Run(){
@@ -46,18 +57,20 @@ public:
             self->Loop();
         });
         runThread.detach();
+
     }
 
     void Loop(){
         Rml::Context* context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height));
         Rml::Debugger::Initialise(context);
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
-
         document->Show();
         bool running = true;
+        m_running = true;
+        Backend::SetContext(context,&Shell::ProcessKeyDownShortcuts);
         while (running)
         {
-            running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
+            //running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
             context->Update();
             Backend::BeginFrame();
             context->Render();

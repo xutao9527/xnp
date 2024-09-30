@@ -1,32 +1,3 @@
-/*
- * This source file is part of RmlUi, the HTML/CSS Interface Middleware
- *
- * For the latest information, see http://github.com/mikke89/RmlUi
- *
- * Copyright (c) 2008-2010 CodePoint Ltd, Shift Technology Ltd
- * Copyright (c) 2019-2023 The RmlUi Team, and contributors
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- */
-
-
 #include "RmlUi_Include_Windows.h"
 #include "RmlUi_Platform_Win32.h"
 #include "RmlUi_Renderer_VK.h"
@@ -209,6 +180,11 @@ static bool NextEvent(MSG& message, UINT timeout)
     return PeekMessage(&message, nullptr, 0, 0, PM_REMOVE);
 }
 
+void Backend::SetContext(Rml::Context* context, KeyDownCallback key_down_callback){
+    data->context = context;
+    data->key_down_callback = key_down_callback;
+}
+
 bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save)
 {
     RMLUI_ASSERT(data && context);
@@ -266,7 +242,7 @@ void Backend::BeginFrame()
 
 void Backend::PresentFrame()
 {
-    RMLUI_ASSERT(data);
+    //RMLUI_ASSERT(data);
     data->render_interface.EndFrame();
 
     // Optional, used to mark frames during performance profiling.
@@ -274,10 +250,12 @@ void Backend::PresentFrame()
 }
 
 // Local event handler for window and input events.
-static LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
+LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
 {
-    RMLUI_ASSERT(data);
-
+    //RMLUI_ASSERT(data);
+    if(!data){
+        return 0;
+    }
     switch (message)
     {
         case WM_CLOSE:
@@ -342,7 +320,7 @@ static LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message,
     }
 
     // All unhandled messages go to DefWindowProc.
-    return DefWindowProc(window_handle, message, w_param, l_param);
+    return 0;
 }
 
 static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize,HWND hwnd)
@@ -350,7 +328,7 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
     // Fill out the window class struct.
     WNDCLASSW window_class;
     window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    window_class.lpfnWndProc = &WindowProcedureHandler; // Attach our local event handler.
+    window_class.lpfnWndProc = &Backend::WindowProcedureHandler; // Attach our local event handler.
     window_class.cbClsExtra = 0;
     window_class.cbWndExtra = 0;
     window_class.hInstance = instance_handle;
@@ -366,12 +344,12 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
         return nullptr;
     }
 
-    HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-                                         name.data(),                                                                // Window class name.
-                                         name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
-                                         0, 0,                                                                       // Window size.
-                                         nullptr, nullptr, instance_handle, nullptr);
-    // HWND window_handle = hwnd;
+    // HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
+    //                                      name.data(),                                                                // Window class name.
+    //                                      name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
+    //                                      0, 0,                                                                       // Window size.
+    //                                      nullptr, nullptr, instance_handle, nullptr);
+    HWND window_handle = hwnd;
     if (!window_handle)
     {
         Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
