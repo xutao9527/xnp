@@ -77,6 +77,7 @@ public:
         document->Show();
         m_running = true;
         Backend::SetContext(context,&Shell::ProcessKeyDownShortcuts);
+
         using clock = std::chrono::high_resolution_clock;
         auto last_time = clock::now();
         int frame_count = 0;
