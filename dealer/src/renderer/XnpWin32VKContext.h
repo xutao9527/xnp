@@ -104,6 +104,13 @@ public:
         Init();
     }
 
+    ~XnpWin32VKContext()
+    {
+        Rml::Shutdown();
+        Rml::SetTextInputHandler(nullptr);
+        render_interface.Shutdown();
+    }
+
     void Init()
     {
         InitializeDpiSupport();
@@ -132,6 +139,7 @@ public:
         Rml::SetSystemInterface(&system_interface);
         Rml::SetRenderInterface(&render_interface);
         context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height));
+        key_down_callback =  &Shell::ProcessKeyDownShortcuts;
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
         document->Show();
     }
@@ -155,6 +163,7 @@ public:
     void Loop()
     {
         running = true;
+
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
             cv.wait(lock, [=] {
@@ -163,7 +172,7 @@ public:
                     Win32VkEvent event = eventQueue.front();
                     eventQueue.pop();
                     wxLogMessage(L"处理事件:%d", event.message);
-                    ProcessEvents(context,&Shell::ProcessKeyDownShortcuts,true,window_handle, event.message, event.w_param, event.l_param);
+                    ProcessEvents(window_handle, event.message, event.w_param, event.l_param);
                     rvl = true;
                 }
                 return rvl;
@@ -178,7 +187,7 @@ public:
         Rml::RemoveContext("main");
     }
 
-    bool ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save,HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param){
+    bool ProcessEvents(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param){
         if (context_dimensions_dirty)
         {
             context_dimensions_dirty = false;
@@ -233,7 +242,7 @@ public:
             {
                 // Override the default key event callback to add global shortcuts for the samples.
                 Rml::Context* context = context;
-                KeyDownCallback key_down_callback = key_down_callback;
+                 key_down_callback = key_down_callback;
 
                 const Rml::Input::KeyIdentifier rml_key = RmlWin32::ConvertKey((int)w_param);
                 const int rml_modifier = RmlWin32::GetKeyModifierState();
@@ -277,11 +286,7 @@ public:
         return USER_DEFAULT_SCREEN_DPI;
     }
 
-    ~XnpWin32VKContext()
-    {
-        int a = 0;
-        wxLogMessage(L"析构%d", a);
-    }
+
 
     void InitializeDpiSupport()
     {
