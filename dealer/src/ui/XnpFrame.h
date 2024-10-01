@@ -29,7 +29,11 @@ public:
         //     context->Run();
         //     xnpRmlUIContext = std::weak_ptr<XnpRmlUIContext>(context);
         // }
-        std::shared_ptr<XnpWin32VKContext> context = std::make_shared<XnpWin32VKContext>();
+
+        std::shared_ptr<XnpWin32VKContext> context = std::make_shared<XnpWin32VKContext>(GetHWND(),
+                                                                                         GetTitle().ToStdString(),
+                                                                                         GetClientRect().GetWidth(),
+                                                                                         GetClientRect().GetHeight());
         xnpWin32VKContext = std::weak_ptr<XnpWin32VKContext>(context);
         context->Run();
 
