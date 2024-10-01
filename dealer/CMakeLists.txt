@@ -38,7 +38,7 @@ set(CODE_SOURCES
         src/event/XnpEventHandler.cpp
 )
 
-add_executable(${PROJECT_NAME}
+add_executable(${PROJECT_NAME} WIN32
         ${SHELL_SOURCES}
         ${BACKENDS_SOURCES}
         ${CODE_SOURCES}

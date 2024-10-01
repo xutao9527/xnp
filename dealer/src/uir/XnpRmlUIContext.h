@@ -81,7 +81,7 @@ public:
         Rml::Debugger::Initialise(context);
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
         document->Show();
-        bool running = true;
+
         m_running = true;
         Backend::SetContext(context,&Shell::ProcessKeyDownShortcuts);
         using clock = std::chrono::high_resolution_clock;
@@ -89,16 +89,16 @@ public:
         int frame_count = 0;
         double fps = 0.0;
         const int fps_update_interval = 10; // 每100帧更新一次FPS
-        while (running)
+        std::unique_lock<std::mutex> lock(mutex);
+        while (m_running)
         {
             //running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
-            std::unique_lock<std::mutex> lock(mutex);
             cv.wait(lock, [=] {
                 bool result = false;
                 while (!message_queue.empty()){
                     MessageData msg_data = message_queue.front();
                     message_queue.pop();  // 移除消息
-                    Backend::ProcessEvents(context,&Shell::ProcessKeyDownShortcuts,true,window_handle, msg_data.message, msg_data.w_param, msg_data.l_param);
+                    m_running = Backend::ProcessEvents(context,&Shell::ProcessKeyDownShortcuts,true,window_handle, msg_data.message, msg_data.w_param, msg_data.l_param);
                     result = true;
                 }
                 return result;
@@ -123,12 +123,13 @@ public:
                 last_time = current_time;
             }
         }
+        // 释放渲染资源
+        Rml::ReleaseTextures(Backend::GetRenderInterface());
     }
 
     ~XnpRmlUIContext(){
         Rml::Shutdown();
         Backend::Shutdown();
-        wxLogInfo(L"析构~~~~");
     }
 };
 
