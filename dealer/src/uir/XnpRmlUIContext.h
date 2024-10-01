@@ -13,7 +13,17 @@
 #include <RmlUi/Debugger.h>
 #include <Shell.h>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 
+struct MessageData {
+    UINT message;
+    WPARAM w_param;
+    LPARAM l_param;
+
+    MessageData(UINT msg, WPARAM wp, LPARAM lp)
+            : message(msg), w_param(wp), l_param(lp) {}
+};
 
 class XnpRmlUIContext: public std::enable_shared_from_this<XnpRmlUIContext>
 {
@@ -23,6 +33,10 @@ private:
     int window_height;
     HWND window_handle;
     std::atomic<bool> m_running;
+
+    std::queue<MessageData> message_queue;
+    std::mutex mutex;
+    std::condition_variable cv;
 public:
     XnpRmlUIContext(){
         wxLogInfo(L"构造~~~~");
@@ -35,12 +49,14 @@ public:
         window_handle = hwnd;
     }
 
-    LRESULT EventHandler(UINT message, WXWPARAM wParam, WXLPARAM lParam){
+    LRESULT EventHandler(UINT message, WPARAM w_param, LPARAM l_param){
         if(m_running){
             //if(message!=70&&message!=36&&message!=131&&message!=71){
-                return Backend::WindowProcedureHandler(window_handle, message, wParam, lParam);
+            //wxLogInfo("EventHandler: %d", message);
+            //return Backend::WindowProcedureHandler(window_handle, message, w_param, l_param);
             //}
-
+            message_queue.emplace(message, w_param, l_param);
+            cv.notify_all();
         }
         return 0;
     }
@@ -68,13 +84,44 @@ public:
         bool running = true;
         m_running = true;
         Backend::SetContext(context,&Shell::ProcessKeyDownShortcuts);
+        using clock = std::chrono::high_resolution_clock;
+        auto last_time = clock::now();
+        int frame_count = 0;
+        double fps = 0.0;
+        const int fps_update_interval = 10; // 每100帧更新一次FPS
         while (running)
         {
             //running = Backend::ProcessEvents(context, &Shell::ProcessKeyDownShortcuts, true);
+            std::unique_lock<std::mutex> lock(mutex);
+            cv.wait(lock, [=] {
+                bool result = false;
+                while (!message_queue.empty()){
+                    MessageData msg_data = message_queue.front();
+                    message_queue.pop();  // 移除消息
+                    Backend::ProcessEvents(context,&Shell::ProcessKeyDownShortcuts,true,window_handle, msg_data.message, msg_data.w_param, msg_data.l_param);
+                    result = true;
+                }
+                return result;
+            });
+
             context->Update();
             Backend::BeginFrame();
             context->Render();
             Backend::PresentFrame();
+            // 计算帧率
+            auto current_time = clock::now();
+            frame_count++;
+
+            //wxLogMessage("Frame count: %d", frame_count);
+            if (frame_count >= fps_update_interval) {
+                std::chrono::duration<double> elapsed = current_time - last_time;
+                fps = frame_count / elapsed.count();
+                wxLogMessage("FPS: %.2f", fps);  // 使用 wxWidgets 进行日志输出
+
+                // 重置计数器
+                frame_count = 0;
+                last_time = current_time;
+            }
         }
     }
 

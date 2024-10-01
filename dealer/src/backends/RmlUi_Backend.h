@@ -58,6 +58,7 @@ Rml::RenderInterface* GetRenderInterface();
 
 // Polls and processes events from the current platform, and applies any relevant events to the provided RmlUi context and the key down callback.
 // @return False to indicate that the application should be closed.
+bool ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save,HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param);
 bool ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback = nullptr, bool power_save = false);
 // Request application closure during the next event processing call.
 void RequestExit();

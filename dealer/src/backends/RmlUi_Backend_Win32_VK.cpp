@@ -8,6 +8,7 @@
 #include <RmlUi/Core/Log.h>
 #include <RmlUi/Core/Profiling.h>
 #include "RmlUi_Backend.h"
+#include <wx/wx.h>
 
 /**
     High DPI support using Windows Per Monitor V2 DPI awareness.
@@ -70,11 +71,6 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
 // Create the Win32 Vulkan surface.
 static bool CreateVulkanSurface(VkInstance instance, VkSurfaceKHR* out_surface);
 
-/**
-    Global data used by this backend.
-
-    Lifetime governed by the calls to Backend::Initialize() and Backend::Shutdown().
- */
 struct BackendData {
     SystemInterface_Win32 system_interface;
     RenderInterface_VK render_interface;
@@ -128,10 +124,10 @@ bool Backend::Initialize(const char* window_name, int width, int height, bool al
     data->system_interface.SetWindow(window_handle);
     data->render_interface.SetViewport(width, height);
 
-    // Now we are ready to show the window.
-    ::ShowWindow(window_handle, SW_SHOW);
-    ::SetForegroundWindow(window_handle);
-    ::SetFocus(window_handle);
+    //Now we are ready to show the window.
+    // ::ShowWindow(window_handle, SW_SHOW);
+    // ::SetForegroundWindow(window_handle);
+    // ::SetFocus(window_handle);
 
     // Provide a backend-specific text input handler to manage the IME.
     Rml::SetTextInputHandler(&data->text_input_method_editor);
@@ -167,12 +163,17 @@ Rml::RenderInterface* Backend::GetRenderInterface()
     return &data->render_interface;
 }
 
+
+
 static bool NextEvent(MSG& message, UINT timeout)
 {
     if (timeout != 0)
     {
         UINT_PTR timer_id = SetTimer(NULL, 0, timeout, NULL);
         BOOL res = GetMessage(&message, NULL, 0, 0);
+        if(res){
+            wxLogMessage("message: %d", message.message);
+        }
         KillTimer(NULL, timer_id);
         if (message.message != WM_TIMER || message.hwnd != nullptr || message.wParam != timer_id)
             return res;
@@ -183,6 +184,30 @@ static bool NextEvent(MSG& message, UINT timeout)
 void Backend::SetContext(Rml::Context* context, KeyDownCallback key_down_callback){
     data->context = context;
     data->key_down_callback = key_down_callback;
+}
+
+bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save,HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param){
+    RMLUI_ASSERT(data && context);
+    if (data->context_dimensions_dirty)
+    {
+        data->context_dimensions_dirty = false;
+        const float dp_ratio = GetDensityIndependentPixelRatio(data->window_handle);
+        context->SetDimensions(data->window_dimensions);
+        context->SetDensityIndependentPixelRatio(dp_ratio);
+    }
+    data->context = context;
+    data->key_down_callback = key_down_callback;
+
+    WindowProcedureHandler(window_handle,message,w_param,l_param);
+    while (!data->render_interface.IsSwapchainValid()){
+        if (!data->render_interface.IsSwapchainValid())
+            data->render_interface.RecreateSwapchain();
+    }
+
+    data->context = nullptr;
+    data->key_down_callback = nullptr;
+
+    return data->running;
 }
 
 bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save)
@@ -252,10 +277,6 @@ void Backend::PresentFrame()
 // Local event handler for window and input events.
 LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
 {
-    //RMLUI_ASSERT(data);
-    if(!data){
-        return 0;
-    }
     switch (message)
     {
         case WM_CLOSE:
@@ -263,13 +284,14 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
             data->running = false;
             return 0;
         }
-            break;
+
         case WM_SIZE:
         {
             const int width = LOWORD(l_param);
             const int height = HIWORD(l_param);
             data->window_dimensions.x = width;
             data->window_dimensions.y = height;
+
             if (data->context)
             {
                 data->render_interface.SetViewport(width, height);
@@ -277,7 +299,7 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
             }
             return 0;
         }
-            break;
+
         case WM_DPICHANGED:
         {
             RECT* new_pos = (RECT*)l_param;
@@ -287,7 +309,7 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
                 data->context->SetDensityIndependentPixelRatio(GetDensityIndependentPixelRatio(window_handle));
             return 0;
         }
-            break;
+
         case WM_KEYDOWN:
         {
             // Override the default key event callback to add global shortcuts for the samples.
@@ -309,17 +331,14 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
                 return 0;
             return 0;
         }
-            break;
         default:
         {
             // Submit it to the platform handler for default input handling.
             if (!RmlWin32::WindowProcedure(data->context, data->text_input_method_editor, window_handle, message, w_param, l_param))
                 return 0;
         }
-            break;
     }
-
-    // All unhandled messages go to DefWindowProc.
+    //return DefWindowProc(window_handle, message, w_param, l_param);
     return 0;
 }
 
@@ -343,19 +362,19 @@ static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name
     //     Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to register window class");
     //     return nullptr;
     // }
-
+    //
     // HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
     //                                      name.data(),                                                                // Window class name.
     //                                      name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
     //                                      0, 0,                                                                       // Window size.
     //                                      nullptr, nullptr, instance_handle, nullptr);
     HWND window_handle = hwnd;
-    if (!window_handle)
-    {
-        Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
-        return nullptr;
-    }
-
+    // if (!window_handle)
+    // {
+    //     Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
+    //     return nullptr;
+    // }
+    //
     // UINT window_dpi = GetWindowDpi(window_handle);
     // inout_width = (inout_width * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
     // inout_height = (inout_height * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
