@@ -38,9 +38,7 @@ private:
     std::mutex mutex;
     std::condition_variable cv;
 public:
-    XnpRmlUIContext(){
-        wxLogInfo(L"构造~~~~");
-    }
+    XnpRmlUIContext(){}
 
     void Init(std::string title,int width,int height,HWND hwnd){
         window_title = std::move(title);
@@ -51,10 +49,6 @@ public:
 
     LRESULT EventHandler(UINT message, WPARAM w_param, LPARAM l_param){
         if(m_running){
-            //if(message!=70&&message!=36&&message!=131&&message!=71){
-            //wxLogInfo("EventHandler: %d", message);
-            //return Backend::WindowProcedureHandler(window_handle, message, w_param, l_param);
-            //}
             message_queue.emplace(message, w_param, l_param);
             cv.notify_all();
         }
@@ -81,7 +75,6 @@ public:
         Rml::Debugger::Initialise(context);
         Rml::ElementDocument* document = context->LoadDocument("assets/demo.rml");
         document->Show();
-
         m_running = true;
         Backend::SetContext(context,&Shell::ProcessKeyDownShortcuts);
         using clock = std::chrono::high_resolution_clock;

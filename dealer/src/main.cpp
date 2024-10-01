@@ -24,11 +24,7 @@ public:
         return true;
     }
 
-
-
     int OnExit() override{
-        // Rml::Shutdown();
-        // Shell::Shutdown();
         return 0;
     }
 };
