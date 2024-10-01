@@ -20,7 +20,6 @@ struct MessageData {
     UINT message;
     WPARAM w_param;
     LPARAM l_param;
-
     MessageData(UINT msg, WPARAM wp, LPARAM lp)
             : message(msg), w_param(wp), l_param(lp) {}
 };

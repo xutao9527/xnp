@@ -25,15 +25,16 @@ set(BACKENDS_SOURCES
         src/backends/RmlUi_Include_Windows.h
         src/backends/RmlUi_Backend_Win32_VK.cpp
         src/backends/RmlUi_Backend.h
-
 )
 
 set(CODE_SOURCES
         src/main.cpp
         src/ui/XnpFrame.h
         src/ui/XnpFrame.cpp
-        src/render/XnpRmlUIContext.h
-        src/render/XnpRmlUIContext.cpp
+        src/renderer/XnpRmlUIContext.h
+        src/renderer/XnpRmlUIContext.cpp
+        src/renderer/XnpWin32VKContext.h
+        src/renderer/XnpWin32VKContext.cpp
         src/event/XnpEventHandler.h
         src/event/XnpEventHandler.cpp
 )
@@ -56,6 +57,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
-target_include_directories(${PROJECT_NAME} PUBLIC src/render)
+target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 target_include_directories(${PROJECT_NAME} PUBLIC src/shell)
 target_include_directories(${PROJECT_NAME} PUBLIC src/backends)
+target_include_directories(${PROJECT_NAME} PUBLIC src/event)
