@@ -36,7 +36,7 @@ public:
                                                                                          GetClientRect().GetHeight());
         xnpWin32VKContext = std::weak_ptr<XnpWin32VKContext>(context);
         context->Run();
-
+        context.reset();
     }
 
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override

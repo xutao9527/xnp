@@ -76,13 +76,11 @@ private:
     RenderInterface_VK render_interface;
     TextInputMethodEditor_Win32 text_input_method_editor;
 
-    HINSTANCE instance_handle = nullptr;
-    std::wstring instance_name;
-
     bool context_dimensions_dirty = true;
     Rml::Vector2i window_dimensions;
     Rml::Context* context = nullptr;
     KeyDownCallback key_down_callback = nullptr;
+
     HWND window_handle = nullptr;
     std::string window_title;
     int window_width;
@@ -155,7 +153,7 @@ public:
 
     void PushEvent(UINT message, WPARAM w_param, LPARAM l_param)
     {
-        wxLogMessage(L"添加事件:%d", message);
+        //wxLogMessage(L"添加事件:%d", message);
         eventQueue.emplace(message, w_param, l_param);
         cv.notify_all();
     }
@@ -163,7 +161,6 @@ public:
     void Loop()
     {
         running = true;
-
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
             cv.wait(lock, [=] {
@@ -171,8 +168,8 @@ public:
                 while (!eventQueue.empty()){
                     Win32VkEvent event = eventQueue.front();
                     eventQueue.pop();
-                    wxLogMessage(L"处理事件:%d", event.message);
-                    ProcessEvents(window_handle, event.message, event.w_param, event.l_param);
+                    //wxLogMessage(L"处理事件:%d", event.message);
+                    ProcessEvents(event.message, event.w_param, event.l_param);
                     rvl = true;
                 }
                 return rvl;
@@ -187,15 +184,15 @@ public:
         Rml::RemoveContext("main");
     }
 
-    bool ProcessEvents(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param){
+    bool ProcessEvents(UINT message, WPARAM w_param, LPARAM l_param){
         if (context_dimensions_dirty)
         {
             context_dimensions_dirty = false;
-            const float dp_ratio = GetDensityIndependentPixelRatio(window_handle);
+            const float dp_ratio = GetDensityIndependentPixelRatio();
             context->SetDimensions(window_dimensions);
             context->SetDensityIndependentPixelRatio(dp_ratio);
         }
-        WindowProcedureHandler(window_handle,message,w_param,l_param);
+        WindowProcedureHandler(message,w_param,l_param);
         while (!render_interface.IsSwapchainValid()){
             if (!render_interface.IsSwapchainValid())
                 render_interface.RecreateSwapchain();
@@ -203,7 +200,7 @@ public:
         return running;
     }
 
-    LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
+    LRESULT CALLBACK WindowProcedureHandler(UINT message, WPARAM w_param, LPARAM l_param)
     {
         switch (message)
         {
@@ -212,7 +209,6 @@ public:
                 running = false;
                 return 0;
             }
-
             case WM_SIZE:
             {
                 const int width = LOWORD(l_param);
@@ -227,27 +223,21 @@ public:
                 }
                 return 0;
             }
-
             case WM_DPICHANGED:
             {
                 RECT* new_pos = (RECT*)l_param;
                 SetWindowPos(window_handle, NULL, new_pos->left, new_pos->top, new_pos->right - new_pos->left, new_pos->bottom - new_pos->top,
                              SWP_NOZORDER | SWP_NOACTIVATE);
                 if (context && has_dpi_support)
-                    context->SetDensityIndependentPixelRatio(GetDensityIndependentPixelRatio(window_handle));
+                    context->SetDensityIndependentPixelRatio(GetDensityIndependentPixelRatio());
                 return 0;
             }
-
             case WM_KEYDOWN:
             {
                 // Override the default key event callback to add global shortcuts for the samples.
-                Rml::Context* context = context;
-                 key_down_callback = key_down_callback;
-
                 const Rml::Input::KeyIdentifier rml_key = RmlWin32::ConvertKey((int)w_param);
                 const int rml_modifier = RmlWin32::GetKeyModifierState();
-                const float native_dp_ratio = GetDensityIndependentPixelRatio(window_handle);
-
+                const float native_dp_ratio = GetDensityIndependentPixelRatio();
                 // See if we have any global shortcuts that take priority over the context.
                 if (key_down_callback && !key_down_callback(context, rml_key, rml_modifier, native_dp_ratio, true))
                     return 0;
@@ -270,23 +260,20 @@ public:
         return 0;
     }
 
-    float GetDensityIndependentPixelRatio(HWND window_handle)
+    float GetDensityIndependentPixelRatio()
     {
-        return float(GetWindowDpi(window_handle)) / float(USER_DEFAULT_SCREEN_DPI);
-    }
-
-    UINT GetWindowDpi(HWND window_handle)
-    {
-        if (has_dpi_support)
+        auto GetWindowDpi =  [this]()->UINT
         {
-            UINT dpi = procGetDpiForWindow(window_handle);
-            if (dpi != 0)
-                return dpi;
-        }
-        return USER_DEFAULT_SCREEN_DPI;
+            if (has_dpi_support)
+            {
+                UINT dpi = procGetDpiForWindow(window_handle);
+                if (dpi != 0)
+                    return dpi;
+            }
+            return USER_DEFAULT_SCREEN_DPI;
+        };
+        return float(GetWindowDpi()) / float(USER_DEFAULT_SCREEN_DPI);
     }
-
-
 
     void InitializeDpiSupport()
     {
@@ -305,7 +292,6 @@ public:
                 has_dpi_support = true;
         }
     }
-
 
 };
 
