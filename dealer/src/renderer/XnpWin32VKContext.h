@@ -80,12 +80,12 @@ private:
     KeyDownCallback key_down_callback = nullptr;
 
     HWND window_handle = nullptr;
-    std::string window_title;
+    std::wstring window_title;
     int window_width;
     int window_height;
     static std::atomic<HWND> hwnd;
 public:
-    XnpWin32VKContext(HWND win_hwnd, std::string title, int width, int height)
+    XnpWin32VKContext(HWND win_hwnd, std::wstring title, int width, int height)
             : window_handle(win_hwnd),
               window_title(std::move(title)),
               window_width(width),
@@ -113,7 +113,6 @@ public:
         Rml::Vector<const char *> extensions;
         extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
         extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-
         auto CreateVulkanSurface = [](VkInstance instance, VkSurfaceKHR *out_surface) {
             VkWin32SurfaceCreateInfoKHR info = {};
             info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -210,7 +209,6 @@ public:
                 const int height = HIWORD(l_param);
                 window_dimensions.x = width;
                 window_dimensions.y = height;
-
                 if (context) {
                     render_interface.SetViewport(width, height);
                     context->SetDimensions(window_dimensions);
@@ -235,8 +233,7 @@ public:
                 if (key_down_callback && !key_down_callback(context, rml_key, rml_modifier, native_dp_ratio, true))
                     return 0;
                 // Otherwise, hand the event over to the context by calling the input handler as normal.
-                if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,
-                                               l_param))
+                if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,l_param))
                     return 0;
                 // The key was not consumed by the context either, try keyboard shortcuts of lower priority.
                 if (key_down_callback && !key_down_callback(context, rml_key, rml_modifier, native_dp_ratio, false))

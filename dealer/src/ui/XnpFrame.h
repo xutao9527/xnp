@@ -26,9 +26,9 @@ public:
     XnpFrame(wxWindow *parent,wxWindowID id,const wxString& title) : wxFrame(parent, id, title)
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
-        std::string sTitle = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().to_bytes(GetTitle().ToStdWstring()) ;
+        //std::string sTitle = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().to_bytes(GetTitle().ToStdWstring()) ;
         std::shared_ptr<XnpWin32VKContext> context = std::make_shared<XnpWin32VKContext>(GetHWND(),
-                                                                                         sTitle,
+                                                                                         GetTitle().ToStdWstring(),
                                                                                          GetClientRect().GetWidth(),
                                                                                          GetClientRect().GetHeight());
         xnpWin32VKContext = std::weak_ptr<XnpWin32VKContext>(context);
