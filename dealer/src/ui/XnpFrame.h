@@ -8,9 +8,13 @@
 
 #endif
 
+#include <string>
+#include <locale>
+#include <codecvt>
 #include "XnpEventHandler.h"
 #include "XnpRmlUIContext.h"
 #include "XnpWin32VKContext.h"
+
 
 class XnpFrame : public wxFrame
 {
@@ -19,19 +23,12 @@ class XnpFrame : public wxFrame
 
     std::weak_ptr<XnpWin32VKContext> xnpWin32VKContext;
 public:
-    XnpFrame() : wxFrame(nullptr, wxID_ANY, "wx")
+    XnpFrame(wxWindow *parent,wxWindowID id,const wxString& title) : wxFrame(parent, id, title)
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
-        // window_handle = GetHWND();
-        // {
-        //     std::shared_ptr<XnpRmlUIContext> context = std::make_shared<XnpRmlUIContext>();
-        //     context->Init("wx", 512, 384, window_handle);
-        //     context->Run();
-        //     xnpRmlUIContext = std::weak_ptr<XnpRmlUIContext>(context);
-        // }
-
+        std::string sTitle = std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>().to_bytes(GetTitle().ToStdWstring()) ;
         std::shared_ptr<XnpWin32VKContext> context = std::make_shared<XnpWin32VKContext>(GetHWND(),
-                                                                                         GetTitle().ToStdString(),
+                                                                                         sTitle,
                                                                                          GetClientRect().GetWidth(),
                                                                                          GetClientRect().GetHeight());
         xnpWin32VKContext = std::weak_ptr<XnpWin32VKContext>(context);
@@ -44,9 +41,6 @@ public:
         if(auto context = xnpWin32VKContext.lock()){
             context->PushEvent(message,wParam,lParam);
         }
-        // if(auto context = xnpRmlUIContext.lock()){
-        //    context->EventHandler(message,wParam,lParam);
-        // }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
 
