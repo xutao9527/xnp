@@ -31,8 +31,6 @@ set(CODE_SOURCES
         src/main.cpp
         src/ui/XnpFrame.h
         src/ui/XnpFrame.cpp
-        src/renderer/XnpRmlUIContext.h
-        src/renderer/XnpRmlUIContext.cpp
         src/renderer/XnpWin32VKContext.h
         src/renderer/XnpWin32VKContext.cpp
         src/event/XnpEventHandler.h
@@ -44,6 +42,7 @@ add_executable(${PROJECT_NAME} WIN32
         ${BACKENDS_SOURCES}
         ${CODE_SOURCES}
         resources.rc)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
         ${wxWidgets_LIBRARIES}
@@ -52,6 +51,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
         imm32
         -static
 )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )

@@ -12,7 +12,6 @@
 #include <locale>
 #include <codecvt>
 #include "XnpEventHandler.h"
-#include "XnpRmlUIContext.h"
 #include "XnpWin32VKContext.h"
 
 
