@@ -110,7 +110,6 @@ public:
 
     void Init()
     {
-
         InitializeDpiSupport();
         Rml::Vector<const char *> extensions;
         extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
