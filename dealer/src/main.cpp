@@ -24,7 +24,8 @@ public:
         return true;
     }
 
-    int OnExit() override{
+    int OnExit() override
+    {
         return 0;
     }
 };
