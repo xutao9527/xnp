@@ -56,8 +56,7 @@ private:
     // Declare pointers to the DPI aware Windows API functions.
     using ProcSetProcessDpiAwarenessContext = BOOL(WINAPI *)(HANDLE value);
     using ProcGetDpiForWindow = UINT(WINAPI *)(HWND hwnd);
-    using ProcAdjustWindowRectExForDpi = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle,
-                                                        UINT dpi);
+    using ProcAdjustWindowRectExForDpi = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
     bool has_dpi_support = false;
     ProcSetProcessDpiAwarenessContext procSetProcessDpiAwarenessContext = nullptr;
     ProcGetDpiForWindow procGetDpiForWindow = nullptr;
