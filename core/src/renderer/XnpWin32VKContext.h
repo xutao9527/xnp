@@ -88,8 +88,10 @@ public:
 
     ~XnpWin32VKContext()
     {
-        Rml::SetTextInputHandler(nullptr);
         Rml::Shutdown();
+        if (Rml::GetTextInputHandler() == &text_input_method_editor)
+            Rml::SetTextInputHandler(nullptr);
+        render_interface.Shutdown();
         Shell::Shutdown();
     }
 
@@ -157,9 +159,8 @@ public:
             context->Render();
             render_interface.EndFrame();
         }
-        Rml::ReleaseTextures(&render_interface);
+        //Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(Shell::ConvertToString(window_title));
-        render_interface.Shutdown();
     }
 
     void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);
