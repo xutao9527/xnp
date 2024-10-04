@@ -84,6 +84,7 @@ private:
     int window_width;
     int window_height;
     static std::atomic<HWND> hwnd;
+
 public:
     XnpWin32VKContext(HWND win_hwnd, std::wstring title, int width, int height)
             : window_handle(win_hwnd),
