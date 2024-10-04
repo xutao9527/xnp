@@ -30,7 +30,6 @@ struct Win32VkEvent
     UINT message;
     WPARAM w_param;
     LPARAM l_param;
-
     Win32VkEvent(UINT msg, WPARAM wp, LPARAM lp)
             : message(msg), w_param(wp), l_param(lp) {}
 };
@@ -93,6 +92,7 @@ public:
         Rml::Shutdown();
         Shell::Shutdown();
     }
+
     void Setting(){
         InitializeDpiSupport();
         Rml::Vector<const char *> extensions;
@@ -120,7 +120,7 @@ public:
     }
     void Init()
     {
-        context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height),&render_interface);
+        context = Rml::CreateContext(Shell::ConvertToString(window_title), Rml::Vector2i(window_width, window_height),&render_interface);
         Rml::ElementDocument *document = context->LoadDocument("assets/demo.rml");
         document->Show();
         Rml::Debugger::Initialise(context);
@@ -158,10 +158,9 @@ public:
             render_interface.EndFrame();
         }
         Rml::ReleaseTextures(&render_interface);
-        Rml::RemoveContext("main");
+        Rml::RemoveContext(Shell::ConvertToString(window_title));
         render_interface.Shutdown();
     }
-
 
     void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);
 

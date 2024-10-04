@@ -120,3 +120,10 @@ bool Shell::ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdenti
     return result;
 }
 
+std::string Shell::ConvertToString(const std::wstring& wstring){
+    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstring);
+}
+
+std::wstring Shell::ConvertToWString(const std::string& string){
+   return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(string);
+}
