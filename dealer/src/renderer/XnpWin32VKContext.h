@@ -25,7 +25,6 @@
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger/Debugger.h>
 
-
 struct Win32VkEvent
 {
     UINT message;
@@ -35,20 +34,6 @@ struct Win32VkEvent
     Win32VkEvent(UINT msg, WPARAM wp, LPARAM lp)
             : message(msg), w_param(wp), l_param(lp) {}
 };
-
-static bool CreateVulkanSurface(VkInstance instance, VkSurfaceKHR *out_surface)
-{
-    VkWin32SurfaceCreateInfoKHR info = {};
-    info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    info.hinstance = GetModuleHandle(nullptr);
-    //info.hwnd = window_handle;
-
-    VkResult status = vkCreateWin32SurfaceKHR(instance, &info, nullptr, out_surface);
-
-    bool result = (status == VK_SUCCESS);
-    RMLUI_VK_ASSERTMSG(result, "Failed to create Win32 Vulkan surface");
-    return result;
-}
 
 class XnpWin32VKContext : public std::enable_shared_from_this<XnpWin32VKContext>
 {
@@ -93,23 +78,22 @@ public:
               window_height(height)
     {
         // 线程安全，只执行一次
-        std::call_once(initFlag, []() {
+        std::call_once(initFlag, [this]() {
             Rml::Initialise();
+            Rml::SetTextInputHandler(&text_input_method_editor);
             Shell::Initialize();
             Shell::LoadFonts();
         });
-        Init();
+        Setting();
     }
 
     ~XnpWin32VKContext()
     {
-        Rml::Shutdown();
         Rml::SetTextInputHandler(nullptr);
-        render_interface.Shutdown();
+        Rml::Shutdown();
+        Shell::Shutdown();
     }
-
-    void Init()
-    {
+    void Setting(){
         InitializeDpiSupport();
         Rml::Vector<const char *> extensions;
         extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -119,7 +103,6 @@ public:
             info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
             info.hinstance = GetModuleHandle(nullptr);
             info.hwnd = hwnd.load();
-
             VkResult status = vkCreateWin32SurfaceKHR(instance, &info, nullptr, out_surface);
             bool result = (status == VK_SUCCESS);
             RMLUI_VK_ASSERTMSG(result, "Failed to create Win32 Vulkan surface");
@@ -132,11 +115,12 @@ public:
         }
         system_interface.SetWindow(window_handle);
         render_interface.SetViewport(window_width, window_height);
-        Rml::SetTextInputHandler(&text_input_method_editor);
-        Rml::SetSystemInterface(&system_interface);
-        Rml::SetRenderInterface(&render_interface);
-        context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height));
         key_down_callback = &Shell::ProcessKeyDownShortcuts;
+
+    }
+    void Init()
+    {
+        context = Rml::CreateContext("main", Rml::Vector2i(window_width, window_height),&render_interface);
         Rml::ElementDocument *document = context->LoadDocument("assets/demo.rml");
         document->Show();
         Rml::Debugger::Initialise(context);
@@ -145,6 +129,7 @@ public:
     void Run()
     {
         auto self = shared_from_this();
+        Init();
         std::thread loopThread([=] {
             self->Loop();
         });
@@ -174,10 +159,11 @@ public:
         }
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext("main");
+        render_interface.Shutdown();
     }
 
 
-    void PushEvent(UINT message, WPARAM w_param, LPARAM l_param);
+    void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);
 
     bool ProcessEvents(UINT message, WPARAM w_param, LPARAM l_param);
 

@@ -9,7 +9,6 @@
 
 class XnpApp : public wxApp
 {
-
 public:
     bool OnInit() override
     {

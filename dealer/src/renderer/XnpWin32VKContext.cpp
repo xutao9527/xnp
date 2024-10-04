@@ -3,10 +3,7 @@
 std::once_flag XnpWin32VKContext::initFlag;
 std::atomic<HWND> XnpWin32VKContext::hwnd{ nullptr };
 
-
-
-
-void XnpWin32VKContext::PushEvent(UINT message, WPARAM w_param, LPARAM l_param)
+void XnpWin32VKContext::DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param)
 {
     //wxLogMessage(L"添加事件:%d", message);
     eventQueue.emplace(message, w_param, l_param);
@@ -49,7 +46,7 @@ LRESULT CALLBACK XnpWin32VKContext::WindowProcedureHandler(UINT message, WPARAM 
         }
         case WM_DPICHANGED: {
             RECT *new_pos = (RECT *) l_param;
-            SetWindowPos(window_handle, NULL, new_pos->left, new_pos->top, new_pos->right - new_pos->left,
+            SetWindowPos(window_handle, nullptr, new_pos->left, new_pos->top, new_pos->right - new_pos->left,
                          new_pos->bottom - new_pos->top,
                          SWP_NOZORDER | SWP_NOACTIVATE);
             if (context && has_dpi_support)
@@ -74,13 +71,12 @@ LRESULT CALLBACK XnpWin32VKContext::WindowProcedureHandler(UINT message, WPARAM 
         }
         default: {
             // Submit it to the platform handler for default input handling.
-            if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,
-                                           l_param))
+            if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,l_param))
                 return 0;
         }
     }
-    //return DefWindowProc(window_handle, message, w_param, l_param);
     return 0;
+    //return DefWindowProc(window_handle, message, w_param, l_param);
 }
 
 float XnpWin32VKContext::GetDensityIndependentPixelRatio()

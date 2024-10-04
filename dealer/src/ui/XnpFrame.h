@@ -34,7 +34,7 @@ public:
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override
     {
         if(auto context = xnpWin32VKContext.lock()){
-            context->PushEvent(message,wParam,lParam);
+            context->DispatchEvent(message,wParam,lParam);
         }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
