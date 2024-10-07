@@ -39,11 +39,11 @@ void Shell::LoadFonts()
         bool fallback_face;
     };
     FontFace font_faces[] = {
-        {"LatoLatin-Regular.ttf", false},
-        {"LatoLatin-Italic.ttf", false},
-        {"LatoLatin-Bold.ttf", false},
-        {"LatoLatin-BoldItalic.ttf", false},
-        {"NotoEmoji-Regular.ttf", false},
+        // {"LatoLatin-Regular.ttf", false},
+        // {"LatoLatin-Italic.ttf", false},
+        // {"LatoLatin-Bold.ttf", false},
+        // {"LatoLatin-BoldItalic.ttf", false},
+        // {"NotoEmoji-Regular.ttf", false},
         {"SourceHanSansSC-Regular.ttf", false},
         {"SourceHanSansSC-Bold.ttf",    false},
     };

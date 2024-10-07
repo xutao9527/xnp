@@ -26,3 +26,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
+
+# 创建一个自定义目标 copy_resources，每次构建时执行
+add_custom_target(copy_resources ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/resources" "${CMAKE_BINARY_DIR}/resources"
+        COMMENT "Copying resources to the build directory"
+)
+
+# 将 copy_resources 目标与 your_executable 关联
+add_dependencies(${PROJECT_NAME} copy_resources)
