@@ -25,3 +25,4 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
+target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
