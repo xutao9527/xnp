@@ -1,3 +1,32 @@
+/*
+ * This source file is part of RmlUi, the HTML/CSS Interface Middleware
+ *
+ * For the latest information, see http://github.com/mikke89/RmlUi
+ *
+ * Copyright (c) 2008-2010 CodePoint Ltd, Shift Technology Ltd
+ * Copyright (c) 2019-2023 The RmlUi Team, and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+#include "RmlUi_Backend.h"
 #include "RmlUi_Include_Windows.h"
 #include "RmlUi_Platform_Win32.h"
 #include "RmlUi_Renderer_VK.h"
@@ -7,8 +36,6 @@
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/Log.h>
 #include <RmlUi/Core/Profiling.h>
-#include "RmlUi_Backend.h"
-#include <wx/wx.h>
 
 /**
     High DPI support using Windows Per Monitor V2 DPI awareness.
@@ -67,10 +94,15 @@ static float GetDensityIndependentPixelRatio(HWND window_handle)
 }
 
 // Create the window but don't show it yet. Returns the pixel size of the window, which may be different than the passed size due to DPI settings.
-static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize, HWND hwnd);
+static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize);
 // Create the Win32 Vulkan surface.
 static bool CreateVulkanSurface(VkInstance instance, VkSurfaceKHR* out_surface);
 
+/**
+    Global data used by this backend.
+
+    Lifetime governed by the calls to Backend::Initialize() and Backend::Shutdown().
+ */
 struct BackendData {
     SystemInterface_Win32 system_interface;
     RenderInterface_VK render_interface;
@@ -90,7 +122,7 @@ struct BackendData {
 };
 static Rml::UniquePtr<BackendData> data;
 
-bool Backend::Initialize(const char* window_name, int width, int height, bool allow_resize ,HWND hwnd)
+bool Backend::Initialize(const char* window_name, int width, int height, bool allow_resize)
 {
     RMLUI_ASSERT(!data);
 
@@ -104,7 +136,7 @@ bool Backend::Initialize(const char* window_name, int width, int height, bool al
     InitializeDpiSupport();
 
     // Initialize the window but don't show it yet.
-    HWND window_handle = InitializeWindow(data->instance_handle, name, width, height, allow_resize, hwnd);
+    HWND window_handle = InitializeWindow(data->instance_handle, name, width, height, allow_resize);
     if (!window_handle)
         return false;
 
@@ -124,10 +156,10 @@ bool Backend::Initialize(const char* window_name, int width, int height, bool al
     data->system_interface.SetWindow(window_handle);
     data->render_interface.SetViewport(width, height);
 
-    //Now we are ready to show the window.
-    // ::ShowWindow(window_handle, SW_SHOW);
-    // ::SetForegroundWindow(window_handle);
-    // ::SetFocus(window_handle);
+    // Now we are ready to show the window.
+    ::ShowWindow(window_handle, SW_SHOW);
+    ::SetForegroundWindow(window_handle);
+    ::SetFocus(window_handle);
 
     // Provide a backend-specific text input handler to manage the IME.
     Rml::SetTextInputHandler(&data->text_input_method_editor);
@@ -163,51 +195,17 @@ Rml::RenderInterface* Backend::GetRenderInterface()
     return &data->render_interface;
 }
 
-
-
 static bool NextEvent(MSG& message, UINT timeout)
 {
     if (timeout != 0)
     {
         UINT_PTR timer_id = SetTimer(NULL, 0, timeout, NULL);
         BOOL res = GetMessage(&message, NULL, 0, 0);
-        if(res){
-            wxLogMessage("message: %d", message.message);
-        }
         KillTimer(NULL, timer_id);
         if (message.message != WM_TIMER || message.hwnd != nullptr || message.wParam != timer_id)
             return res;
     }
     return PeekMessage(&message, nullptr, 0, 0, PM_REMOVE);
-}
-
-void Backend::SetContext(Rml::Context* context, KeyDownCallback key_down_callback){
-    data->context = context;
-    data->key_down_callback = key_down_callback;
-}
-
-bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save,HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param){
-    RMLUI_ASSERT(data && context);
-    if (data->context_dimensions_dirty)
-    {
-        data->context_dimensions_dirty = false;
-        const float dp_ratio = GetDensityIndependentPixelRatio(data->window_handle);
-        context->SetDimensions(data->window_dimensions);
-        context->SetDensityIndependentPixelRatio(dp_ratio);
-    }
-    data->context = context;
-    data->key_down_callback = key_down_callback;
-
-    WindowProcedureHandler(window_handle,message,w_param,l_param);
-    while (!data->render_interface.IsSwapchainValid()){
-        if (!data->render_interface.IsSwapchainValid())
-            data->render_interface.RecreateSwapchain();
-    }
-
-    data->context = nullptr;
-    data->key_down_callback = nullptr;
-
-    return data->running;
 }
 
 bool Backend::ProcessEvents(Rml::Context* context, KeyDownCallback key_down_callback, bool power_save)
@@ -261,13 +259,13 @@ void Backend::RequestExit()
 
 void Backend::BeginFrame()
 {
-    //RMLUI_ASSERT(data);
+    RMLUI_ASSERT(data);
     data->render_interface.BeginFrame();
 }
 
 void Backend::PresentFrame()
 {
-    //RMLUI_ASSERT(data);
+    RMLUI_ASSERT(data);
     data->render_interface.EndFrame();
 
     // Optional, used to mark frames during performance profiling.
@@ -275,8 +273,10 @@ void Backend::PresentFrame()
 }
 
 // Local event handler for window and input events.
-LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
+static LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param)
 {
+    RMLUI_ASSERT(data);
+
     switch (message)
     {
         case WM_CLOSE:
@@ -284,14 +284,13 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
             data->running = false;
             return 0;
         }
-
+            break;
         case WM_SIZE:
         {
             const int width = LOWORD(l_param);
             const int height = HIWORD(l_param);
             data->window_dimensions.x = width;
             data->window_dimensions.y = height;
-
             if (data->context)
             {
                 data->render_interface.SetViewport(width, height);
@@ -299,7 +298,7 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
             }
             return 0;
         }
-
+            break;
         case WM_DPICHANGED:
         {
             RECT* new_pos = (RECT*)l_param;
@@ -309,7 +308,7 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
                 data->context->SetDensityIndependentPixelRatio(GetDensityIndependentPixelRatio(window_handle));
             return 0;
         }
-
+            break;
         case WM_KEYDOWN:
         {
             // Override the default key event callback to add global shortcuts for the samples.
@@ -331,77 +330,80 @@ LRESULT CALLBACK Backend::WindowProcedureHandler(HWND window_handle, UINT messag
                 return 0;
             return 0;
         }
+            break;
         default:
         {
             // Submit it to the platform handler for default input handling.
             if (!RmlWin32::WindowProcedure(data->context, data->text_input_method_editor, window_handle, message, w_param, l_param))
                 return 0;
         }
+            break;
     }
-    //return DefWindowProc(window_handle, message, w_param, l_param);
-    return 0;
+
+    // All unhandled messages go to DefWindowProc.
+    return DefWindowProc(window_handle, message, w_param, l_param);
 }
 
-static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize,HWND hwnd)
+static HWND InitializeWindow(HINSTANCE instance_handle, const std::wstring& name, int& inout_width, int& inout_height, bool allow_resize)
 {
     // Fill out the window class struct.
-    // WNDCLASSW window_class;
-    // window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    // window_class.lpfnWndProc = &Backend::WindowProcedureHandler; // Attach our local event handler.
-    // window_class.cbClsExtra = 0;
-    // window_class.cbWndExtra = 0;
-    // window_class.hInstance = instance_handle;
-    // window_class.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
-    // window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    // window_class.hbrBackground = nullptr;
-    // window_class.lpszMenuName = nullptr;
-    // window_class.lpszClassName = name.data();
-    //
-    // if (!RegisterClassW(&window_class))
-    // {
-    //     Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to register window class");
-    //     return nullptr;
-    // }
-    //
-    // HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-    //                                      name.data(),                                                                // Window class name.
-    //                                      name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
-    //                                      0, 0,                                                                       // Window size.
-    //                                      nullptr, nullptr, instance_handle, nullptr);
-    HWND window_handle = hwnd;
-    // if (!window_handle)
-    // {
-    //     Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
-    //     return nullptr;
-    // }
-    //
-    // UINT window_dpi = GetWindowDpi(window_handle);
-    // inout_width = (inout_width * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
-    // inout_height = (inout_height * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
-    //
-    // DWORD style = (allow_resize ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX));
-    // DWORD extended_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-    //
-    // // Adjust the window size to take the edges into account.
-    // RECT window_rect;
-    // window_rect.top = 0;
-    // window_rect.left = 0;
-    // window_rect.right = inout_width;
-    // window_rect.bottom = inout_height;
-    // if (has_dpi_support)
-    //     procAdjustWindowRectExForDpi(&window_rect, style, FALSE, extended_style, window_dpi);
-    // else
-    //     AdjustWindowRectEx(&window_rect, style, FALSE, extended_style);
-    //
-    // SetWindowLong(window_handle, GWL_EXSTYLE, extended_style);
-    // SetWindowLong(window_handle, GWL_STYLE, style);
-    //
-    // // Resize the window and center it on the screen.
-    // Rml::Vector2i screen_size = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
-    // Rml::Vector2i window_size = {int(window_rect.right - window_rect.left), int(window_rect.bottom - window_rect.top)};
-    // Rml::Vector2i window_pos = Rml::Math::Max((screen_size - window_size) / 2, Rml::Vector2i(0));
-    //
-    // SetWindowPos(window_handle, HWND_TOP, window_pos.x, window_pos.y, window_size.x, window_size.y, SWP_NOACTIVATE);
+    WNDCLASSW window_class;
+    window_class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    window_class.lpfnWndProc = &WindowProcedureHandler; // Attach our local event handler.
+    window_class.cbClsExtra = 0;
+    window_class.cbWndExtra = 0;
+    window_class.hInstance = instance_handle;
+    window_class.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+    window_class.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    window_class.hbrBackground = nullptr;
+    window_class.lpszMenuName = nullptr;
+    window_class.lpszClassName = name.data();
+
+    if (!RegisterClassW(&window_class))
+    {
+        Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to register window class");
+        return nullptr;
+    }
+
+    HWND window_handle = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
+                                         name.data(),                                                                // Window class name.
+                                         name.data(), WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW, 0, 0, // Window position.
+                                         0, 0,                                                                       // Window size.
+                                         nullptr, nullptr, instance_handle, nullptr);
+
+    if (!window_handle)
+    {
+        Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to create window");
+        return nullptr;
+    }
+
+    UINT window_dpi = GetWindowDpi(window_handle);
+    inout_width = (inout_width * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
+    inout_height = (inout_height * (int)window_dpi) / USER_DEFAULT_SCREEN_DPI;
+
+    DWORD style = (allow_resize ? WS_OVERLAPPEDWINDOW : (WS_OVERLAPPEDWINDOW & ~WS_SIZEBOX & ~WS_MAXIMIZEBOX));
+    DWORD extended_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+
+    // Adjust the window size to take the edges into account.
+    RECT window_rect;
+    window_rect.top = 0;
+    window_rect.left = 0;
+    window_rect.right = inout_width;
+    window_rect.bottom = inout_height;
+    if (has_dpi_support)
+        procAdjustWindowRectExForDpi(&window_rect, style, FALSE, extended_style, window_dpi);
+    else
+        AdjustWindowRectEx(&window_rect, style, FALSE, extended_style);
+
+    SetWindowLong(window_handle, GWL_EXSTYLE, extended_style);
+    SetWindowLong(window_handle, GWL_STYLE, style);
+
+    // Resize the window and center it on the screen.
+    Rml::Vector2i screen_size = {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
+    Rml::Vector2i window_size = {int(window_rect.right - window_rect.left), int(window_rect.bottom - window_rect.top)};
+    Rml::Vector2i window_pos = Rml::Math::Max((screen_size - window_size) / 2, Rml::Vector2i(0));
+
+    SetWindowPos(window_handle, HWND_TOP, window_pos.x, window_pos.y, window_size.x, window_size.y, SWP_NOACTIVATE);
 
     return window_handle;
 }
