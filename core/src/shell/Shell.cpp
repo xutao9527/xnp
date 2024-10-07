@@ -43,7 +43,7 @@ void Shell::LoadFonts()
         // {"LatoLatin-Italic.ttf", false},
         // {"LatoLatin-Bold.ttf", false},
         // {"LatoLatin-BoldItalic.ttf", false},
-        // {"NotoEmoji-Regular.ttf", false},
+        {"NotoEmoji-Regular.ttf", true},
         {"SourceHanSansSC-Regular.ttf", false},
         {"SourceHanSansSC-Bold.ttf",    false},
     };

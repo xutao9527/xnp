@@ -1,5 +1,6 @@
 <rml>
     <head>
+        <title>login</title>
         <style>
             body
             {
@@ -9,7 +10,7 @@
             }
         </style>
     </head>
-    <body>
-        哈哈哈1
+    <body >
+        <input type="text" style="background: #00BF00"/>
     </body>
 </rml>

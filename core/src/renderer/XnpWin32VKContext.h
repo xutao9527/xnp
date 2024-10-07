@@ -79,7 +79,7 @@ public:
         // 线程安全，只执行一次
         std::call_once(initFlag, [this]() {
             Rml::Initialise();
-            Rml::SetTextInputHandler(&text_input_method_editor);
+            //Rml::SetTextInputHandler(&text_input_method_editor);
             Shell::Initialize();
             Shell::LoadFonts();
         });

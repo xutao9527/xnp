@@ -39,7 +39,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         ${wxWidgets_LIBRARIES}
         RmlUi::RmlUi
-        OpenGL::GL
         imm32
         -static
 )
