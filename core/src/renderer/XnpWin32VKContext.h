@@ -36,7 +36,7 @@ struct Win32VkEvent
 
 class XnpWin32VKContext : public std::enable_shared_from_this<XnpWin32VKContext>
 {
-private:
+protected:
     // Declare pointers to the DPI aware Windows API functions.
     using ProcSetProcessDpiAwarenessContext = BOOL(WINAPI *)(HANDLE value);
     using ProcGetDpiForWindow = UINT(WINAPI *)(HWND hwnd);
@@ -118,14 +118,8 @@ public:
         system_interface.SetWindow(window_handle);
         render_interface.SetViewport(window_width, window_height);
     }
-    void Init()
-    {
-        key_down_callback = &Shell::ProcessKeyDownShortcuts;
-        context = Rml::CreateContext(Shell::ConvertToString(window_title), Rml::Vector2i(window_width, window_height),&render_interface);
-        Rml::ElementDocument *document = context->LoadDocument("assets/demo.rml");
-        document->Show();
-        Rml::Debugger::Initialise(context);
-    }
+    virtual void Init() = 0;
+
 
     void Run()
     {

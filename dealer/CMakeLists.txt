@@ -6,6 +6,8 @@ set(CODE_SOURCES
         src/main.cpp
         src/ui/XnpFrame.h
         src/ui/XnpFrame.cpp
+        src/renderer/DbgRenderer.h
+        src/renderer/DbgRenderer.cpp
 )
 
 add_executable(${PROJECT_NAME} WIN32
