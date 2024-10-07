@@ -79,7 +79,7 @@ public:
         // 线程安全，只执行一次
         std::call_once(initFlag, [this]() {
             Rml::Initialise();
-            //Rml::SetTextInputHandler(&text_input_method_editor);
+            Rml::SetTextInputHandler(&text_input_method_editor);
             Shell::Initialize();
             Shell::LoadFonts();
         });
@@ -115,6 +115,7 @@ public:
             wxLogError("Failed to initialize Vulkan render interface");
             throw std::runtime_error("Failed to initialize Vulkan render interface");
         }
+        Rml::SetSystemInterface(&system_interface);
         system_interface.SetWindow(window_handle);
         render_interface.SetViewport(window_width, window_height);
     }
