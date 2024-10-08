@@ -115,7 +115,8 @@ public:
             wxLogError("Failed to initialize Vulkan render interface");
             throw std::runtime_error("Failed to initialize Vulkan render interface");
         }
-        Rml::SetSystemInterface(&system_interface);
+        //Rml::SetSystemInterface(&system_interface);
+        //Rml::SetRenderInterface(&render_interface);
         system_interface.SetWindow(window_handle);
         render_interface.SetViewport(window_width, window_height);
     }
