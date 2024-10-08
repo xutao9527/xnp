@@ -11,7 +11,6 @@ endforeach()
 if (EXISTS ${CMAKE_INSTALL_PREFIX}/lib/librmlui.dll.a)
     file(COPY "${CMAKE_INSTALL_PREFIX}/bin/" DESTINATION "${CMAKE_BINARY_DIR}")
     message(STATUS "******************** RmlUi is already installed ********************")
-
 else ()
     set(BUILD_SHARED_LIBS ON)           # RMLUI动态库
     set(RMLUI_SVG_PLUGIN OFF)           # RMLUI插件SVG

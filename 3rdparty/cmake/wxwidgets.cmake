@@ -5,6 +5,7 @@ if (EXISTS ${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib/libwxbase32ud.a OR EXISTS "${
 #    find_package(wxWidgets REQUIRED)
 else ()
     #set(wxBUILD_SAMPLES All)
+    set(wxUSE_STL ON)
     set(wxBUILD_SHARED OFF)
     set(wxBUILD_MONOLITHIC OFF)
     set(wxBUILD_USE_STATIC_RUNTIME ON)
