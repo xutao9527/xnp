@@ -2,7 +2,7 @@ project(xnp-core)
 
 # 搜索wxWidgets库
 set(wxWidgets_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib/gcc_x64_lib")
-find_package(wxWidgets REQUIRED COMPONENTS core base)
+find_package(wxWidgets REQUIRED COMPONENTS core base png)
 find_package(RmlUi REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -37,11 +37,10 @@ add_library(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
-
         RmlUi::RmlUi
         ${wxWidgets_LIBRARIES}
         imm32
-        #Shlwapi
+        -static
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)
