@@ -19,12 +19,21 @@
 class XnpFrame : public wxFrame
 {
     std::weak_ptr<DbgRenderer> rendererContext;
-    wxImage image;
+    wxImage shapeImage;
 public:
-    XnpFrame(wxWindow *parent,wxWindowID id,const wxString& title)
-    : wxFrame(parent, id, title,wxDefaultPosition,wxSize(512, 384))
+    XnpFrame(wxWindow *parent,
+    wxWindowID id,
+    const wxString& title,
+    const wxPoint& pos = wxDefaultPosition,
+    const wxSize& size = wxDefaultSize,
+    long style = wxDEFAULT_FRAME_STYLE,
+    const wxString& name = wxASCII_STR(wxFrameNameStr))
+    : wxFrame(parent, id, title,pos,size,style,name)
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
+
+        SetWindowStyle(wxDEFAULT_FRAME_STYLE|wxFRAME_SHAPED);
+
         // std::shared_ptr<DbgRenderer> context = std::make_shared<DbgRenderer>(GetHWND(),
         //                                                                                  GetTitle().ToStdWstring(),
         //                                                                                  GetClientRect().GetWidth(),
@@ -32,45 +41,35 @@ public:
         // rendererContext = std::weak_ptr<DbgRenderer>(context);
         // context->Run();
         // context.reset();
-        // 设置背景颜色为透明
-        //SetBackgroundStyle(wxBG_STYLE_PAINT);  // 设置背景样式
-        //SetTransparent(150);  // 设置窗体半透明
+        InitShapeImage();
+    }
 
+    void InitShapeImage(){
+        wxBitmap bitmap(GetClientRect().GetWidth(), GetClientRect().GetHeight()); // 创建支持透明的位图
+        bitmap.UseAlpha(true);
+        wxMemoryDC memDC(bitmap);
+        // 设置背景为透明
+        memDC.SetBackground(wxBrush(wxColour(0, 0, 0, 0))); // 设置透明背景
+        memDC.Clear(); // 清空位图以应用透明背景
+        // 创建图形上下文
+        wxGraphicsContext* gc = wxGraphicsContext::Create(memDC);
+        if (gc) {
+            gc->SetBrush(*wxRED_BRUSH); // 设置填充颜色为红色
+            gc->SetPen(*wxTRANSPARENT_PEN); // 设置透明边框
+            gc->DrawRoundedRectangle(0, 0, GetClientRect().GetWidth(), GetClientRect().GetHeight(), 10); // 绘制圆角矩形
+            delete gc; // 删除图形上下文
+        }
+        // 完成绘制后，解除 wxMemoryDC 和 wxBitmap 的关联
+        memDC.SelectObject(wxNullBitmap);
+        shapeImage = bitmap.ConvertToImage();
 
-        // // 创建 wxBitmap 对象
-        // wxBitmap bitmap(200, 200);
-        // // 创建 wxMemoryDC 对象
-        // wxMemoryDC memDC(bitmap);
-        // // 使用 wxGraphicsContext 来绘制抗锯齿的图形
-        // wxGraphicsContext* gc = wxGraphicsContext::Create(memDC);
-        // if (gc) {
-        //     // 设置没有边框的画笔 (wxTRANSPARENT_PEN)
-        //     gc->SetPen(*wxTRANSPARENT_PEN);
-        //
-        //     // 设置填充颜色为红色
-        //     gc->SetBrush(*wxRED_BRUSH);
-        //
-        //     // 绘制一个带抗锯齿效果的圆角矩形
-        //     //gc->DrawRoundedRectangle(0, 0, 200, 200, 50);
-        //     int radius = 100; // 圆半径
-        //     gc->DrawEllipse(0, 0, radius * 2, radius * 2); // 绘制圆形
-        //
-        //     // 删除 gc 对象
-        //     delete gc;
-        // }
-        //
-        // // 完成绘制后，解除 wxMemoryDC 和 wxBitmap 的关联
-        // memDC.SelectObject(wxNullBitmap);
-        //
-        // wxImage image = bitmap.ConvertToImage();
-        // image.InitStandardHandlers();
-        // // 保存为 PNG 文件
-        // if (image.SaveFile("circle.png")) {
-        //     wxLogMessage("Image saved successfully as " );
-        // }
-        //
-
-        // dc.DrawBitmap(bitmap, 0, 0, false);  // 将 bitmap 绘制到窗口上
+        if(shapeImage.IsOk()){
+            if(shapeImage.HasAlpha())
+            {
+                shapeImage.ConvertAlphaToMask();
+            }
+            SetShape(wxRegion(shapeImage));
+        }
     }
 
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override
@@ -90,9 +89,7 @@ public:
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
 
-    void SetImage(const wxImage& skin){
-        image = skin;
-    }
+
 
     void OnPaint(wxPaintEvent& e);
 private:

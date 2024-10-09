@@ -21,3 +21,5 @@ add_subdirectory(core)
 add_subdirectory(dealer)
 
 
+#add_subdirectory(test)
+
