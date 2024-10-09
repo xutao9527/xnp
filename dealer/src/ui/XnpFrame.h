@@ -32,20 +32,20 @@ public:
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
 
-        SetWindowStyle(wxDEFAULT_FRAME_STYLE|wxFRAME_SHAPED);
+        SetWindowStyle( wxFRAME_SHAPED | wxNO_BORDER |wxFRAME_NO_TASKBAR  );
 
-        // std::shared_ptr<DbgRenderer> context = std::make_shared<DbgRenderer>(GetHWND(),
-        //                                                                                  GetTitle().ToStdWstring(),
-        //                                                                                  GetClientRect().GetWidth(),
-        //                                                                                  GetClientRect().GetHeight());
-        // rendererContext = std::weak_ptr<DbgRenderer>(context);
-        // context->Run();
-        // context.reset();
+        std::shared_ptr<DbgRenderer> context = std::make_shared<DbgRenderer>(GetHWND(),
+                                                                                         GetTitle().ToStdWstring(),
+                                                                                         GetClientRect().GetWidth(),
+                                                                                         GetClientRect().GetHeight());
         InitShapeImage();
+        rendererContext = std::weak_ptr<DbgRenderer>(context);
+        context->Run();
+        context.reset();
     }
 
     void InitShapeImage(){
-        wxBitmap bitmap(GetClientRect().GetWidth(), GetClientRect().GetHeight()); // 创建支持透明的位图
+        wxBitmap bitmap(GetClientRect().GetWidth(), GetClientRect().GetHeight(),32); // 创建支持透明的位图
         bitmap.UseAlpha(true);
         wxMemoryDC memDC(bitmap);
         // 设置背景为透明
@@ -54,21 +54,21 @@ public:
         // 创建图形上下文
         wxGraphicsContext* gc = wxGraphicsContext::Create(memDC);
         if (gc) {
+            gc->SetAntialiasMode(wxANTIALIAS_DEFAULT);
             gc->SetBrush(*wxRED_BRUSH); // 设置填充颜色为红色
-            gc->SetPen(*wxTRANSPARENT_PEN); // 设置透明边框
-            gc->DrawRoundedRectangle(0, 0, GetClientRect().GetWidth(), GetClientRect().GetHeight(), 10); // 绘制圆角矩形
+            gc->SetPen(wxColour(0, 255, 0)); // 设置透明边框
+            gc->DrawRoundedRectangle(0, 0, GetClientRect().GetWidth()-2, GetClientRect().GetHeight()-2, 8); // 绘制圆角矩形
             delete gc; // 删除图形上下文
         }
         // 完成绘制后，解除 wxMemoryDC 和 wxBitmap 的关联
         memDC.SelectObject(wxNullBitmap);
         shapeImage = bitmap.ConvertToImage();
-
         if(shapeImage.IsOk()){
             if(shapeImage.HasAlpha())
             {
                 shapeImage.ConvertAlphaToMask();
             }
-            SetShape(wxRegion(shapeImage));
+            SetShape(wxRegion(shapeImage.Scale(GetClientRect().GetWidth(),GetClientRect().GetHeight())));
         }
     }
 
@@ -88,8 +88,6 @@ public:
         }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
-
-
 
     void OnPaint(wxPaintEvent& e);
 private:
