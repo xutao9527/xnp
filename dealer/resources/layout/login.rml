@@ -1,16 +1,9 @@
 <rml>
     <head>
         <title>login</title>
-        <style>
-            body
-            {
-                font-family: Source Han Sans SC;
-                font-weight: bold;
-                color: white;
-            }
-        </style>
+        <link type="text/rcss" href="theme.rcss"/>
     </head>
-    <body >
-        <input type="text" style="background: #00BF00;margin-top: 100px"/>
+    <body>
+
     </body>
 </rml>
