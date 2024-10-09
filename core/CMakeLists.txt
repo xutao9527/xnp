@@ -37,10 +37,11 @@ add_library(${PROJECT_NAME}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        ${wxWidgets_LIBRARIES}
+
         RmlUi::RmlUi
+        ${wxWidgets_LIBRARIES}
         imm32
-        -static
+        #Shlwapi
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC src)

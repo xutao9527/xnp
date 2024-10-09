@@ -43,15 +43,16 @@ public:
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override
     {
         if(auto context = rendererContext.lock()){
+            // 文本框输出,激活输入法动态候选框位置
+            if(message == WM_IME_COMPOSITION){
+                context->ActivateKeyboard();
+            }
+            // 派发事件到自绘引擎
             context->DispatchEvent(message,wParam,lParam);
-        }
-        if (message == WM_IME_STARTCOMPOSITION ||
-            message == WM_IME_ENDCOMPOSITION ||
-            message == WM_IME_COMPOSITION ||
-            message == WM_IME_CHAR ||
-            message == WM_IME_REQUEST)
-        {
-            return 0; // 阻止 IME 相关消息的处理
+            // 屏蔽 wxwidgets 本身的事件
+            if (message == WM_IME_STARTCOMPOSITION || message == WM_IME_ENDCOMPOSITION || message == WM_IME_COMPOSITION || message == WM_IME_CHAR || message == WM_IME_REQUEST){
+                return 0;
+            }
         }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
