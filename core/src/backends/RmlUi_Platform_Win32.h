@@ -56,7 +56,12 @@ public:
 
 	void ActivateKeyboard(Rml::Vector2f caret_position, float line_height) override;
 
+
+    void ActivateKeyboard();
 private:
+    Rml::Vector2f caret_position;
+    float line_height;
+
 	HWND window_handle = nullptr;
 
 	double time_frequency = {};
