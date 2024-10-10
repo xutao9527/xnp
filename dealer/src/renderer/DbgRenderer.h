@@ -13,7 +13,7 @@ public:
         std::cout << "DbgRenderer" << std::endl;
     }
 
-    ~DbgRenderer(){
+    ~DbgRenderer() override {
         std::cout << "~DbgRenderer" << std::endl;
     }
 };

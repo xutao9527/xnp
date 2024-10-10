@@ -30,17 +30,19 @@ struct Win32VkEvent
     UINT message;
     WPARAM w_param;
     LPARAM l_param;
+
     Win32VkEvent(UINT msg, WPARAM wp, LPARAM lp)
             : message(msg), w_param(wp), l_param(lp) {}
 };
 
-class XnpWin32VKContext : public std::enable_shared_from_this<XnpWin32VKContext>
+class XnpWin32VKContext
 {
 protected:
     // Declare pointers to the DPI aware Windows API functions.
     using ProcSetProcessDpiAwarenessContext = BOOL(WINAPI *)(HANDLE value);
     using ProcGetDpiForWindow = UINT(WINAPI *)(HWND hwnd);
-    using ProcAdjustWindowRectExForDpi = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle, UINT dpi);
+    using ProcAdjustWindowRectExForDpi = BOOL(WINAPI *)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu, DWORD dwExStyle,
+                                                        UINT dpi);
     bool has_dpi_support = false;
     ProcSetProcessDpiAwarenessContext procSetProcessDpiAwarenessContext = nullptr;
     ProcGetDpiForWindow procGetDpiForWindow = nullptr;
@@ -52,6 +54,8 @@ protected:
     std::queue<Win32VkEvent> eventQueue;
     std::atomic<bool> running{};
     static std::once_flag initFlag;
+    std::promise<void> exit_signal;             // 用于通知线程退出
+    std::future<void> future_exit_signal;       // 用于等待线程结束
 
     // Backend define
     SystemInterface_Win32 system_interface;
@@ -76,6 +80,8 @@ public:
               window_width(width),
               window_height(height)
     {
+        exit_signal = std::promise<void>();
+        future_exit_signal = exit_signal.get_future();
         // 线程安全，只执行一次
         std::call_once(initFlag, [this]() {
             Rml::Initialise();
@@ -87,10 +93,13 @@ public:
         std::cout << "XnpWin32VKContext" << std::endl;
     }
 
-    ~XnpWin32VKContext()
+    virtual ~XnpWin32VKContext()
     {
+        future_exit_signal.wait();  //等待线程退出通知,然后释放资源
+        std::cout << "~XnpWin32VKContext" << std::endl;
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(Shell::ConvertToString(window_title));
+
         Rml::Shutdown();
         if (Rml::GetTextInputHandler() == &text_input_method_editor)
             Rml::SetTextInputHandler(nullptr);
@@ -98,11 +107,13 @@ public:
         Shell::Shutdown();
     }
 
-    void ActivateKeyboard(){
+    void ActivateKeyboard()
+    {
         return system_interface.ActivateKeyboard();
     }
 
-    void Setting(){
+    void Setting()
+    {
         InitializeDpiSupport();
         Rml::Vector<const char *> extensions;
         extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -123,19 +134,17 @@ public:
             throw std::runtime_error("Failed to initialize Vulkan render interface");
         }
         Rml::SetSystemInterface(&system_interface);
-        //Rml::SetRenderInterface(&render_interface);
         system_interface.SetWindow(window_handle);
         render_interface.SetViewport(window_width, window_height);
     }
+
     virtual void Init() = 0;
 
     void Run()
     {
-        auto self = shared_from_this();
         Init();
         std::thread loopThread([=] {
-            self->Loop();
-
+            Loop();
         });
         loopThread.detach();
     }
@@ -145,7 +154,7 @@ public:
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
-            cv.wait(lock,  [=] {
+            cv.wait(lock, [=] {
                 bool rvl = false;
                 while (!eventQueue.empty()) {
                     Win32VkEvent event = eventQueue.front();
@@ -160,9 +169,8 @@ public:
             render_interface.BeginFrame();
             context->Render();
             render_interface.EndFrame();
-
         }
-        int i = 1;
+        exit_signal.set_value();    //通知线程退出
     }
 
     void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);
