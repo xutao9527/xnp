@@ -80,7 +80,7 @@ public:
             }
             // 派发事件到自绘引擎
             context->DispatchEvent(message,wParam,lParam);
-            // 屏蔽 wxwidgets 本身的事件
+            //屏蔽 wxwidgets IME事件
             if (message == WM_IME_STARTCOMPOSITION || message == WM_IME_ENDCOMPOSITION || message == WM_IME_COMPOSITION || message == WM_IME_CHAR || message == WM_IME_REQUEST){
                 return 0;
             }

@@ -139,23 +139,35 @@ public:
     {
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
+
+        // FPS 计数器和时间
+        int frameCount = 0;
+        std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
         while (running) {
-             cv.wait(lock, [=] {
+            cv.wait(lock,  [=] {
                 bool rvl = false;
                 while (!eventQueue.empty()) {
                     Win32VkEvent event = eventQueue.front();
                     eventQueue.pop();
-                    //wxLogMessage(L"处理事件:%d", event.message);
                     ProcessEvents(event.message, event.w_param, event.l_param);
                     rvl = true;
                 }
                 return rvl;
             });
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 防止事件频繁,卡顿
             context->Update();
             render_interface.BeginFrame();
             context->Render();
             render_interface.EndFrame();
-            wxLogMessage("context update !");
+            // FPS 计算
+            frameCount++;
+            // 每10帧输出一次 FPS
+            if (frameCount % 10 == 0) {
+                std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double> duration = currentTime - lastTime;
+                wxLogMessage("FPS: %0.3f",10 / duration.count());
+                lastTime = currentTime; // 更新上次时间
+            }
         }
         //Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(Shell::ConvertToString(window_title));
