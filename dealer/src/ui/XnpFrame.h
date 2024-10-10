@@ -28,20 +28,19 @@ public:
     const wxSize& size = wxDefaultSize,
     long style = wxDEFAULT_FRAME_STYLE,
     const wxString& name = wxASCII_STR(wxFrameNameStr))
-    : wxFrame(parent, id, title,pos,size,style,name)
+    : wxFrame(parent, id, title,pos,size,wxRESIZE_BORDER|wxNO_BORDER|wxFRAME_SHAPED,name)
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
-
-        SetWindowStyle( wxFRAME_SHAPED | wxNO_BORDER |wxFRAME_NO_TASKBAR  );
 
         std::shared_ptr<DbgRenderer> context = std::make_shared<DbgRenderer>(GetHWND(),
                                                                                          GetTitle().ToStdWstring(),
                                                                                          GetClientRect().GetWidth(),
                                                                                          GetClientRect().GetHeight());
-        InitShapeImage();
+
         rendererContext = std::weak_ptr<DbgRenderer>(context);
         context->Run();
         context.reset();
+        InitShapeImage();
     }
 
     void InitShapeImage(){
@@ -68,7 +67,7 @@ public:
             {
                 shapeImage.ConvertAlphaToMask();
             }
-            SetShape(wxRegion(shapeImage.Scale(GetClientRect().GetWidth(),GetClientRect().GetHeight())));
+           //SetShape(wxRegion(shapeImage.Scale(GetClientRect().GetWidth(),GetClientRect().GetHeight())));
         }
     }
 
@@ -85,6 +84,42 @@ public:
             if (message == WM_IME_STARTCOMPOSITION || message == WM_IME_ENDCOMPOSITION || message == WM_IME_COMPOSITION || message == WM_IME_CHAR || message == WM_IME_REQUEST){
                 return 0;
             }
+        }
+        switch( message )
+        {
+            case WM_NCACTIVATE:
+            {
+                lParam = -1;
+                break;
+            }
+            case WM_NCCALCSIZE:
+            {
+                if( wParam )
+                {
+                    HWND hWnd = ( HWND ) this->GetHandle();
+                    WINDOWPLACEMENT wPos;
+                    wPos.length = sizeof( wPos );
+                    GetWindowPlacement( hWnd, &wPos );
+                    if( wPos.showCmd != SW_SHOWMAXIMIZED )
+                    {
+                        RECT borderThickness;
+                        SetRectEmpty( &borderThickness );
+                        AdjustWindowRectEx( &borderThickness,
+                                            GetWindowLongPtr( hWnd, GWL_STYLE ) & ~WS_CAPTION, FALSE, 0 );
+                        borderThickness.left *= -1;
+                        borderThickness.top *= -1;
+                        NCCALCSIZE_PARAMS* sz = reinterpret_cast< NCCALCSIZE_PARAMS* >( lParam );
+                        // Add 1 pixel to the top border to make the window resizable from the top border
+                        sz->rgrc[ 0 ].top += 1;
+                        sz->rgrc[ 0 ].left += borderThickness.left;
+                        sz->rgrc[ 0 ].right -= borderThickness.right;
+                        sz->rgrc[ 0 ].bottom -= borderThickness.bottom;
+                        return 0;
+                    }
+                }
+                break;
+            }
+
         }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
