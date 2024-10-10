@@ -33,7 +33,7 @@ public:
     {
         SetIcon(wxICON(IDI_DEALER_ICON));
         SetWindowStyle(wxNO_BORDER | wxFRAME_SHAPED);
-        rendererContext = std::make_shared<DbgRenderer>(GetHWND(),GetTitle().ToStdWstring(),GetClientRect().GetWidth(),GetClientRect().GetHeight()
+        rendererContext = std::make_shared<DbgRenderer>(GetHWND(),GetTitle(),GetClientRect().GetWidth(),GetClientRect().GetHeight()
         );
         rendererContext->Run();
         //InitShapeImage();

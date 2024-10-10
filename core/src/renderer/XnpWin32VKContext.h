@@ -68,13 +68,13 @@ protected:
     KeyDownCallback key_down_callback = nullptr;
 
     HWND window_handle = nullptr;
-    std::wstring window_title;
+    std::string window_title;
     int window_width;
     int window_height;
     static std::atomic<HWND> hwnd;
 
 public:
-    XnpWin32VKContext(HWND win_hwnd, std::wstring title, int width, int height)
+    XnpWin32VKContext(HWND win_hwnd, std::string title, int width, int height)
             : window_handle(win_hwnd),
               window_title(std::move(title)),
               window_width(width),
@@ -98,7 +98,7 @@ public:
         future_exit_signal.wait();  //等待线程退出通知,然后释放资源
         std::cout << "~XnpWin32VKContext" << std::endl;
         Rml::ReleaseTextures(&render_interface);
-        Rml::RemoveContext(Shell::ConvertToString(window_title));
+        Rml::RemoveContext(window_title);
 
         Rml::Shutdown();
         if (Rml::GetTextInputHandler() == &text_input_method_editor)
