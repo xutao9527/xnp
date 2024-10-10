@@ -140,8 +140,8 @@ public:
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
-            cv.wait(lock, [=] {
-                bool rvl = false;
+             cv.wait(lock, [=] {
+                 bool rvl = false;
                 while (!eventQueue.empty()) {
                     Win32VkEvent event = eventQueue.front();
                     eventQueue.pop();
@@ -155,6 +155,7 @@ public:
             render_interface.BeginFrame();
             context->Render();
             render_interface.EndFrame();
+            wxLogMessage("context update !");
         }
         //Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(Shell::ConvertToString(window_title));

@@ -34,6 +34,7 @@ LRESULT CALLBACK XnpWin32VKContext::WindowProcedureHandler(UINT message, WPARAM 
             return 0;
         }
         case WM_SIZE: {
+            wxLogMessage("WM_SIZE !");
             const int width = LOWORD(l_param);
             const int height = HIWORD(l_param);
             window_dimensions.x = width;
