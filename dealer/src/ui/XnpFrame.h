@@ -31,6 +31,7 @@ public:
              const wxString &name = wxASCII_STR(wxFrameNameStr))
             : wxFrame(parent, id, title, pos, size, style, name)
     {
+        std::cout << "XnpFrame" << std::endl;
         SetIcon(wxICON(IDI_DEALER_ICON));
         //SetWindowStyle(wxNO_BORDER | wxFRAME_SHAPED);
         rendererContext = std::make_shared<DbgRenderer>(GetHWND(),GetTitle(),GetClientRect().GetWidth(),GetClientRect().GetHeight()

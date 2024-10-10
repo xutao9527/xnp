@@ -164,7 +164,7 @@ public:
                 }
                 return rvl;
             });
-            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 防止事件频繁,卡顿
+            std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 防止事件频繁,卡顿
             context->Update();
             render_interface.BeginFrame();
             context->Render();
