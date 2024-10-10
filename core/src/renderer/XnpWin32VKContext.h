@@ -141,7 +141,7 @@ public:
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
              cv.wait(lock, [=] {
-                 bool rvl = false;
+                bool rvl = false;
                 while (!eventQueue.empty()) {
                     Win32VkEvent event = eventQueue.front();
                     eventQueue.pop();
