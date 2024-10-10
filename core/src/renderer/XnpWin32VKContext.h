@@ -23,6 +23,7 @@
 #include "RmlUi_Platform_Win32.h"
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger/Debugger.h>
+#include <future>
 
 struct Win32VkEvent
 {
@@ -83,10 +84,13 @@ public:
             Shell::LoadFonts();
         });
         Setting();
+        std::cout << "XnpWin32VKContext" << std::endl;
     }
 
     ~XnpWin32VKContext()
     {
+        Rml::ReleaseTextures(&render_interface);
+        Rml::RemoveContext(Shell::ConvertToString(window_title));
         Rml::Shutdown();
         if (Rml::GetTextInputHandler() == &text_input_method_editor)
             Rml::SetTextInputHandler(nullptr);
@@ -131,6 +135,7 @@ public:
         Init();
         std::thread loopThread([=] {
             self->Loop();
+
         });
         loopThread.detach();
     }
@@ -139,10 +144,6 @@ public:
     {
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
-
-        // FPS 计数器和时间
-        int frameCount = 0;
-        std::chrono::high_resolution_clock::time_point lastTime = std::chrono::high_resolution_clock::now();
         while (running) {
             cv.wait(lock,  [=] {
                 bool rvl = false;
@@ -159,18 +160,9 @@ public:
             render_interface.BeginFrame();
             context->Render();
             render_interface.EndFrame();
-            // FPS 计算
-            frameCount++;
-            // 每10帧输出一次 FPS
-            if (frameCount % 10 == 0) {
-                std::chrono::high_resolution_clock::time_point currentTime = std::chrono::high_resolution_clock::now();
-                std::chrono::duration<double> duration = currentTime - lastTime;
-                wxLogMessage("FPS: %0.3f",10 / duration.count());
-                lastTime = currentTime; // 更新上次时间
-            }
+
         }
-        //Rml::ReleaseTextures(&render_interface);
-        Rml::RemoveContext(Shell::ConvertToString(window_title));
+        int i = 1;
     }
 
     void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);

@@ -9,6 +9,7 @@
 #endif
 
 #include <wx/graphics.h>
+#include <memory>
 #include <string>
 #include <locale>
 #include <codecvt>
@@ -33,14 +34,20 @@ public:
         SetIcon(wxICON(IDI_DEALER_ICON));
         //SetWindowStyle(wxNO_BORDER);
         std::shared_ptr<DbgRenderer> context = std::make_shared<DbgRenderer>(GetHWND(),
-                                                                                         GetTitle().ToStdWstring(),
-                                                                                         GetClientRect().GetWidth(),
-                                                                                         GetClientRect().GetHeight());
+                                                                                            GetTitle().ToStdWstring(),
+                                                                                            GetClientRect().GetWidth(),
+                                                                                            GetClientRect().GetHeight()
+                                                                            );
         //SetWindowStyle(wxNO_BORDER|wxFRAME_SHAPED);
         rendererContext = std::weak_ptr<DbgRenderer>(context);
         context->Run();
         context.reset();
         //InitShapeImage();
+        std::cout << "XnpFrame" << std::endl;
+    }
+
+    ~XnpFrame() override{
+        std::cout << "~XnpFrame" << std::endl;
     }
 
     void InitShapeImage(){
@@ -73,18 +80,18 @@ public:
 
     WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam) override
     {
-        if(auto context = rendererContext.lock()){
-            // 文本框输出,激活输入法动态候选框位置
-            if(message == WM_IME_COMPOSITION){
-                context->ActivateKeyboard();
-            }
-            // 派发事件到自绘引擎
-            context->DispatchEvent(message,wParam,lParam);
-            //屏蔽 wxwidgets IME事件
-            if (message == WM_IME_STARTCOMPOSITION || message == WM_IME_ENDCOMPOSITION || message == WM_IME_COMPOSITION || message == WM_IME_CHAR || message == WM_IME_REQUEST){
-                return 0;
-            }
-        }
+        // if(auto context = rendererContext.lock()){
+        //     // 文本框输出,激活输入法动态候选框位置
+        //     if(message == WM_IME_COMPOSITION){
+        //         context->ActivateKeyboard();
+        //     }
+        //     // 派发事件到自绘引擎
+        //     context->DispatchEvent(message,wParam,lParam);
+        //     //屏蔽 wxwidgets IME事件
+        //     if (message == WM_IME_STARTCOMPOSITION || message == WM_IME_ENDCOMPOSITION || message == WM_IME_COMPOSITION || message == WM_IME_CHAR || message == WM_IME_REQUEST){
+        //         return 0;
+        //     }
+        // }
         return wxFrame::MSWWindowProc(message, wParam, lParam);
     }
 };

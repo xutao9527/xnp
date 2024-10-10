@@ -9,5 +9,11 @@ public:
     void Init() override;
     DbgRenderer(HWND win_hwnd, std::wstring title, int width, int height)
             : XnpWin32VKContext(win_hwnd, std::move(title), width, height)
-    {}
+    {
+        std::cout << "DbgRenderer" << std::endl;
+    }
+
+    ~DbgRenderer(){
+        std::cout << "~DbgRenderer" << std::endl;
+    }
 };

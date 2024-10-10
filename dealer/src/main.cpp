@@ -26,6 +26,7 @@ public:
 
     int OnExit() override
     {
+        std::cout << "OnExit" << std::endl;
         return 0;
     }
 };
