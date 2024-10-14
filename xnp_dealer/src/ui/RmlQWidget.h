@@ -41,14 +41,21 @@ protected:
 
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override{
         MSG *msg = static_cast<MSG *>(message);
-        // 输出原生事件信息
-        // qDebug() << "Received native event:"
-        //          << "Message:" << msg->message
-        //          << "wParam:" << msg->wParam
-        //          << "lParam:" << msg->lParam;
+        if (auto context = rendererContext) {
+            // 文本框输出,激活输入法动态候选框位置
+            if (msg->message == WM_IME_COMPOSITION) {
+                context->ActivateKeyboard();
+            }
+            // 派发事件到自绘引擎
+            context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
+            //屏蔽 wxwidgets IME事件
+            // if (msg->message == WM_IME_STARTCOMPOSITION || msg->message == WM_IME_ENDCOMPOSITION ||
+            //         msg->message == WM_IME_COMPOSITION || msg->message == WM_IME_CHAR || msg->message == WM_IME_REQUEST) {
+            //
+            // }
+        }
         return QWidget::nativeEvent(eventType, message, result);
     }
-
 };
 
 

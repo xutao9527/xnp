@@ -2,6 +2,7 @@
 
 #include "XnpWin32VKContext.h"
 #include <iostream>
+#include <QDebug>
 
 class DbgRenderer : public XnpWin32VKContext
 {
@@ -11,10 +12,10 @@ public:
     DbgRenderer(HWND win_hwnd, std::string title, int width, int height)
             : XnpWin32VKContext(win_hwnd, std::move(title), width, height)
     {
-        std::cout << "DbgRenderer" << std::endl;
+        qDebug() << "DbgRenderer";
     }
 
     ~DbgRenderer() override {
-        std::cout << "~DbgRenderer" << std::endl;
+        qDebug() << "~DbgRenderer";
     }
 };
