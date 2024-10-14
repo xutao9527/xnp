@@ -33,14 +33,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 
-# copy_qt_dll，每次构建时执行
 add_custom_target(copy_qt_dll ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_INSTALL_PREFIX}/bin/" "${CMAKE_CURRENT_BINARY_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/3rdparty/binary-library/win64/qt/" "${CMAKE_CURRENT_BINARY_DIR}"
         COMMENT "Copying Qt DLLs to the build directory"
         VERBATIM
 )
-
-# 将 copy_qt_dll 目标与 your_executable 关联
 add_dependencies(${PROJECT_NAME} copy_qt_dll)
 

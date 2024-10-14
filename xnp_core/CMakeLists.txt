@@ -6,7 +6,6 @@ if(NOT RmlUi_FOUND)
     return()
 endif()
 
-
 set(SHELL_SOURCES
         src/shell/Shell.cpp
         src/shell/Shell.h

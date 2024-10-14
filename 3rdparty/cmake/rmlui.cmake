@@ -9,7 +9,7 @@ foreach(FREETYPE_DLL_FILE ${FREETYPE_DLL_FILES})
 endforeach()
 # 检查RmlUI是否已经安装
 if (EXISTS ${CMAKE_INSTALL_PREFIX}/lib/librmlui.dll.a)
-    file(COPY "${CMAKE_INSTALL_PREFIX}/bin/" DESTINATION "${CMAKE_BINARY_DIR}")
+#    file(COPY "${CMAKE_INSTALL_PREFIX}/bin/" DESTINATION "${CMAKE_BINARY_DIR}")
     message(STATUS "******************** RmlUi is already installed ********************")
 else ()
     set(BUILD_SHARED_LIBS ON)           # RMLUI动态库
