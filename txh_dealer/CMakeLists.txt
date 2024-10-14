@@ -15,7 +15,9 @@ set(CODE_SOURCES
 
 )
 
-add_executable(${PROJECT_NAME}  ${CODE_SOURCES} )
+set(RESOURCE_FILES resources.rc)
+
+add_executable(${PROJECT_NAME} WIN32 ${CODE_SOURCES} ${RESOURCE_FILES})
 
 target_link_libraries(${PROJECT_NAME}
         Qt5::Widgets

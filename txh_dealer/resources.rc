@@ -1,1 +1,2 @@
-IDI_DEALER_ICON               ICON                    "resources/icon.ico"
+#define APP_ICON 1
+APP_ICON ICON "resources/icon.ico"
