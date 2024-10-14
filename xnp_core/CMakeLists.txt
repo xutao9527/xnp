@@ -7,6 +7,10 @@ if(NOT RmlUi_FOUND)
 endif()
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 set(SHELL_SOURCES
         src/shell/Shell.cpp
         src/shell/Shell.h

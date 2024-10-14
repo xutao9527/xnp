@@ -11,7 +11,7 @@
 class RmlQWidget : public QWidget
 {
     std::shared_ptr<DbgRenderer> rendererContext;
-    QLineEdit *inputLineEdit;  // 输入框
+    //QLineEdit *inputLineEdit;  // 输入框
 public:
     explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
@@ -27,22 +27,16 @@ public:
         qDebug() << "~RmlQWidget";
     }
 
+    void updateOutput(const QString &result) {
+        qDebug() << "RmlQWidget" << result;
+    }
 protected:
     void showEvent(QShowEvent *event) override
     {
         rendererContext = std::make_shared<DbgRenderer>( reinterpret_cast<HWND>(this->winId()), this->windowTitle().toStdString(), this->contentsRect().width(), this->contentsRect().height());
-        rendererContext->Run();
+        rendererContext->start();
+        connect(rendererContext.get(), &DbgRenderer::workDone, this, &RmlQWidget::updateOutput);
         QWidget::showEvent(event);
-        // 设置输入法组合窗口
-        HIMC himc = ImmGetContext(reinterpret_cast<HWND>(this->winId()));  // 获取输入法上下文
-        if (himc) {
-            COMPOSITIONFORM cf;
-            cf.dwStyle = CFS_RECT;  // 设置样式
-            cf.rcArea = { 0, 0, 300, 30 };  // 设置组合窗口的区域，确保与输入框位置匹配
-            ImmSetCompositionWindow(himc, &cf);  // 设置组合窗口
-
-            ImmReleaseContext(reinterpret_cast<HWND>(this->winId()), himc);  // 释放输入法上下文
-        }
     }
 
     void closeEvent(QCloseEvent *event) override

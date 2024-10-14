@@ -9,13 +9,14 @@
 #include <utility>
 
 #include "Shell.h"
-// #include "RmlUi_Backend.h"
+
 #include "RmlUi_Renderer_VK.h"
 #include "RmlUi_Include_Windows.h"
 #include "RmlUi_Platform_Win32.h"
 #include <RmlUi/Core.h>
 #include <RmlUi/Debugger/Debugger.h>
 #include <future>
+#include <QThread>
 
 struct Win32VkEvent
 {
@@ -27,10 +28,12 @@ struct Win32VkEvent
             : message(msg), w_param(wp), l_param(lp) {}
 };
 
-using KeyDownCallback = bool (*)(Rml::Context* context, Rml::Input::KeyIdentifier key, int key_modifier, float native_dp_ratio, bool priority);
+using KeyDownCallback = bool (*)(Rml::Context *context, Rml::Input::KeyIdentifier key, int key_modifier,
+                                 float native_dp_ratio, bool priority);
 
-class XnpWin32VKContext
+class XnpWin32VKContext : public QThread
 {
+Q_OBJECT
 protected:
     // Declare pointers to the DPI aware Windows API functions.
     using ProcSetProcessDpiAwarenessContext = BOOL(WINAPI *)(HANDLE value);
@@ -98,7 +101,8 @@ public:
         Shell::Shutdown();
     }
 
-    void WaitStop(){
+    void WaitStop()
+    {
         future_exit_signal.wait();  //等待线程退出通知,然后释放资源
     }
 
@@ -133,7 +137,7 @@ public:
 
     virtual void Init() = 0;
 
-    void Run()
+    void run() override
     {
         Init();
         std::thread loopThread([=] {
@@ -175,6 +179,8 @@ public:
     float GetDensityIndependentPixelRatio();
 
     void InitializeDpiSupport();
+signals:
+    void workDone(const QString &result);
 };
 
 
