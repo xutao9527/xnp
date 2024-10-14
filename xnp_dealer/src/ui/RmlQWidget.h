@@ -85,6 +85,7 @@ protected:
                 }
                 // 直接传递给自绘引擎
                 context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
+                return true; // 返回 true 表示已处理，不继续传递
             } else {
                 // 其他事件派发到自绘引擎
                 context->DispatchEvent(msg->message, msg->wParam, msg->lParam);

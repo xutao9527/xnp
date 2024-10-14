@@ -157,30 +157,30 @@ void SystemInterface_Win32::ActivateKeyboard(Rml::Vector2f caret_position, float
 {
     this->caret_position = caret_position;
     this->line_height = line_height;
-	// HIMC himc = ImmGetContext(window_handle);
-	// if (himc == NULL)
-	// 	return;
-    //
-	// constexpr LONG BottomMargin = 2;
-    //
-	// // Adjust the position of the input method editor (IME) to the caret.
-	// const LONG x = static_cast<LONG>(caret_position.x);
-	// const LONG y = static_cast<LONG>(caret_position.y);
-	// const LONG w = 1;
-	// const LONG h = static_cast<LONG>(line_height) + BottomMargin;
-    //
-	// COMPOSITIONFORM comp = {};
-	// comp.dwStyle = CFS_FORCE_POSITION;
-	// comp.ptCurrentPos = {x, y};
-	// ImmSetCompositionWindow(himc, &comp);
-    //
-	// CANDIDATEFORM cand = {};
-	// cand.dwStyle = CFS_EXCLUDE;
-	// cand.ptCurrentPos = {x, y};
-	// cand.rcArea = {x, y, x + w, y + h};
-	// ImmSetCandidateWindow(himc, &cand);
-    //
-	// ImmReleaseContext(window_handle, himc);
+	HIMC himc = ImmGetContext(window_handle);
+	if (himc == NULL)
+		return;
+
+	constexpr LONG BottomMargin = 2;
+
+	// Adjust the position of the input method editor (IME) to the caret.
+	const LONG x = static_cast<LONG>(caret_position.x);
+	const LONG y = static_cast<LONG>(caret_position.y);
+	const LONG w = 1;
+	const LONG h = static_cast<LONG>(line_height) + BottomMargin;
+
+	COMPOSITIONFORM comp = {};
+	comp.dwStyle = CFS_FORCE_POSITION;
+	comp.ptCurrentPos = {x, y};
+	ImmSetCompositionWindow(himc, &comp);
+
+	CANDIDATEFORM cand = {};
+	cand.dwStyle = CFS_EXCLUDE;
+	cand.ptCurrentPos = {x, y};
+	cand.rcArea = {x, y, x + w, y + h};
+    int a = ImmSetCandidateWindow(himc, &cand);
+
+	ImmReleaseContext(window_handle, himc);
 }
 
 void SystemInterface_Win32::ActivateKeyboard(){
