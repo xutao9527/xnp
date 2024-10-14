@@ -4,6 +4,6 @@
         <link type="text/rcss" href="theme.rcss"/>
     </head>
     <body>
-        <input type="text" style="background: #2be7a7">
+        <input type="text" style="background: #2be7a7;margin-top: 50px">
     </body>
 </rml>

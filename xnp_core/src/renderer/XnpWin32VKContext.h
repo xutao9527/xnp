@@ -90,7 +90,6 @@ public:
     virtual ~XnpWin32VKContext()
     {
         future_exit_signal.wait();  //等待线程退出通知,然后释放资源
-
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(window_title);
 
@@ -119,7 +118,6 @@ public:
             info.hwnd = hwnd.load();
             VkResult status = vkCreateWin32SurfaceKHR(instance, &info, nullptr, out_surface);
             bool result = (status == VK_SUCCESS);
-            RMLUI_VK_ASSERTMSG(result, "Failed to create Win32 Vulkan surface");
             return result;
         };
         hwnd.store(this->window_handle);
