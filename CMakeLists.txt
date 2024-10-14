@@ -19,6 +19,10 @@ set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
 #add_subdirectory(core)
 ## dealer
 #add_subdirectory(dealer)
-# qt
-add_subdirectory(txh_dealer)
+
+
+## xnp_core
+add_subdirectory(xnp_core)
+# xnp_dealer
+add_subdirectory(xnp_dealer)
 

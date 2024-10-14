@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # 设置项目名称
-project(tx_dealer LANGUAGES CXX)
+project(xnp_dealer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOMOC ON)
@@ -14,6 +14,8 @@ set(CODE_SOURCES
         src/main.cpp
         src/ui/RmlQWidget.h
         src/ui/RmlQWidget.cpp
+        src/renderer/DbgRenderer.h
+        src/renderer/DbgRenderer.cpp
 )
 
 #set(RESOURCE_FILES
@@ -25,7 +27,11 @@ add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
 
 target_link_libraries(${PROJECT_NAME}
         Qt5::Widgets
+        xnp-core
 )
+target_include_directories(${PROJECT_NAME} PUBLIC src)
+target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
+target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 
 # copy_qt_dll，每次构建时执行
 add_custom_target(copy_qt_dll ALL
