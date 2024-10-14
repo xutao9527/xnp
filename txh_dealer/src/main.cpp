@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QDir>
 #include <QDebug>
+#include <QMainWindow>
 
 
 int main(int argc, char *argv[]) {
@@ -30,6 +31,7 @@ int main(int argc, char *argv[]) {
     iconLabel->setAlignment(Qt::AlignCenter); // 设置文本居中对齐
     QVBoxLayout *layout = new QVBoxLayout(&window);
     layout->addWidget(iconLabel, 0, Qt::AlignCenter); // 将 QLabel 居中
+
 
     window.setLayout(layout);
     window.show();
