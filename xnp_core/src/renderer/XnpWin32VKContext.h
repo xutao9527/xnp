@@ -84,20 +84,22 @@ public:
             Shell::LoadFonts();
         });
         Setting();
-
     }
+
 
     virtual ~XnpWin32VKContext()
     {
-        future_exit_signal.wait();  //等待线程退出通知,然后释放资源
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(window_title);
-
         Rml::Shutdown();
         if (Rml::GetTextInputHandler() == &text_input_method_editor)
             Rml::SetTextInputHandler(nullptr);
         render_interface.Shutdown();
         Shell::Shutdown();
+    }
+
+    void WaitStop(){
+        future_exit_signal.wait();  //等待线程退出通知,然后释放资源
     }
 
     void ActivateKeyboard()

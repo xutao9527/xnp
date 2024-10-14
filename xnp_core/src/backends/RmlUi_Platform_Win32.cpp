@@ -201,7 +201,7 @@ void SystemInterface_Win32::ActivateKeyboard(){
     cand.dwStyle = CFS_EXCLUDE;
     cand.ptCurrentPos = {x, y};
     cand.rcArea = {x, y, x + w, y + h};
-    ImmSetCandidateWindow(himc, &cand);
+    int a = ImmSetCandidateWindow(himc, &cand);
     ImmReleaseContext(window_handle, himc);
 }
 

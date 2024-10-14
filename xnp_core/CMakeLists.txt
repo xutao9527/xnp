@@ -20,7 +20,6 @@ set(BACKENDS_SOURCES
         src/backends/RmlUi_Renderer_VK.cpp
         src/backends/RmlUi_Include_Vulkan.h
         src/backends/RmlUi_Include_Windows.h
-#        src/backends/RmlUi_Backend.h
 )
 
 set(CODE_SOURCES
