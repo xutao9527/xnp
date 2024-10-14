@@ -1,0 +1,9 @@
+<rml>
+    <head>
+        <title>login</title>
+        <link type="text/rcss" href="theme.rcss"/>
+    </head>
+    <body>
+        <input type="text" style="background: #2be7a7">
+    </body>
+</rml>

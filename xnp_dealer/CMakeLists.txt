@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED )
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets  )
 
 set(CODE_SOURCES
         src/main.cpp
@@ -26,6 +26,7 @@ set(CODE_SOURCES
 add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
 
 target_link_libraries(${PROJECT_NAME}
+        Qt5::Core
         Qt5::Widgets
         xnp-core
 )
@@ -33,13 +34,15 @@ target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 
-add_custom_target(copy_qt_dll ALL
+add_custom_target(copy_dependencies ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_INSTALL_PREFIX}/bin/" "${CMAKE_CURRENT_BINARY_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/3rdparty/binary-library/win64/qt/" "${CMAKE_CURRENT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
         COMMENT "Copying Qt DLLs to the build directory"
         VERBATIM
 )
-add_dependencies(${PROJECT_NAME} copy_qt_dll)
+add_dependencies(${PROJECT_NAME} copy_dependencies)
 

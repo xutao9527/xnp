@@ -1,0 +1,10 @@
+body
+{
+    font-family: Source Han Sans SC;
+    font-weight: bold;
+    color: white;
+    background-color: #15929a;
+    margin: auto;
+    width: 100%;
+    height: 100%;
+}

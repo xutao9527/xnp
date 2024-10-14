@@ -5,17 +5,24 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <windows.h>
+#include "DbgRenderer.h"
 
 class RmlQWidget : public QWidget
 {
+    std::shared_ptr<DbgRenderer> rendererContext;
 public:
     explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent) {
+        qDebug() << "RmlQWidget";
+    }
 
+    ~RmlQWidget() override{
+        qDebug() << "~RmlQWidget";
     }
 
 protected:
     void showEvent(QShowEvent *event) override
     {
+
         QWidget::showEvent(event);
         // 获取窗口 HWND (winId() 返回的是 HWND)
         HWND hwnd = reinterpret_cast<HWND>(this->winId());
@@ -28,6 +35,8 @@ protected:
         int clientWidth = contents.width();
         int clientHeight = contents.height();
         qDebug() << "客户区宽度:" << clientWidth << "客户区高度:" << clientHeight;
+        rendererContext = std::make_shared<DbgRenderer>(hwnd,title.toStdString(),clientWidth,clientHeight);
+        rendererContext->Run();
     }
 
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override{

@@ -20,7 +20,6 @@ add_subdirectory(3rdparty)
 ## dealer
 #add_subdirectory(dealer)
 
-
 # xnp_core
 add_subdirectory(xnp_core)
 # xnp_dealer
