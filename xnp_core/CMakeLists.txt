@@ -5,6 +5,7 @@ if(NOT RmlUi_FOUND)
     message(WARNING "RmlUi not found, Please install it.")
     return()
 endif()
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
 set(SHELL_SOURCES
         src/shell/Shell.cpp
@@ -35,6 +36,8 @@ add_library(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
+        Qt5::Core
+        Qt5::Widgets
         RmlUi::RmlUi
         imm32
 )

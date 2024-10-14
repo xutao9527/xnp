@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets  )
+
 
 set(CODE_SOURCES
         src/main.cpp
@@ -26,10 +26,7 @@ set(CODE_SOURCES
 add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
 
 target_link_libraries(${PROJECT_NAME}
-        Qt5::Core
-        Qt5::Widgets
         xnp-core
-        imm32
 )
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
