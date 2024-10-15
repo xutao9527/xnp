@@ -46,7 +46,6 @@ protected:
     std::queue<Win32VkEvent> eventQueue;
     std::atomic<bool> running{};
 
-
     // Backend define
     SystemInterface_Win32 system_interface;
     RenderInterface_VK render_interface;
