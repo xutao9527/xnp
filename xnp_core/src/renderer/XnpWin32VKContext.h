@@ -58,6 +58,7 @@ protected:
     bool context_dimensions_dirty = true;
     Rml::Vector2i window_dimensions;
     Rml::Context *context = nullptr;
+    KeyDownCallback key_down_callback = nullptr;
 
     HWND window_handle = nullptr;
     std::string window_title;

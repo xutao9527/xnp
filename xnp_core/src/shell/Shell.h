@@ -16,4 +16,9 @@ namespace Shell{
 
     void LoadFonts();
 
+    bool ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdentifier key, int key_modifier, float native_dp_ratio, bool priority);
+
+    std::string ConvertToString(const std::wstring& wstring);
+
+    std::wstring ConvertToWString(const std::string& string);
 }
