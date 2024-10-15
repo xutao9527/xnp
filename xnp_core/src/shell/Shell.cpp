@@ -56,17 +56,14 @@ bool Shell::ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdenti
 {
     if (!context)
         return true;
-
     // Result should return true to allow the event to propagate to the next handler.
     bool result = false;
-
     // This function is intended to be called twice by the backend, before and after submitting the key event to the context. This way we can
     // intercept shortcuts that should take priority over the context, and then handle any shortcuts of lower priority if the context did not
     // intercept it.
     if (priority)
     {
         // Priority shortcuts are handled before submitting the key to the context.
-
         // Toggle debugger and set dp-ratio using Ctrl +/-/0 keys.
         if (key == Rml::Input::KI_F8)
         {
@@ -120,10 +117,3 @@ bool Shell::ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdenti
     return result;
 }
 
-std::string Shell::ConvertToString(const std::wstring& wstring){
-    return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstring);
-}
-
-std::wstring Shell::ConvertToWString(const std::string& string){
-   return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(string);
-}
