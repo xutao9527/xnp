@@ -29,12 +29,14 @@ public slots:
 protected:
     void showEvent(QShowEvent *event) override
     {
-        rendererContext = std::make_shared<DbgRenderer>( reinterpret_cast<HWND>(this->winId()), this->windowTitle().toStdString(), this->contentsRect().width(), this->contentsRect().height());
-        thread = std::make_shared<QThread>(); // 创建线程
-        rendererContext->moveToThread(thread.get());
-        connect(thread.get(), &QThread::started, rendererContext.get(), &DbgRenderer::Run);
-        connect(rendererContext.get(), &DbgRenderer::ActivateImm, this, &RmlQWidget::ActivateImm);
-        thread->start();
+        if(!rendererContext.get()){
+            rendererContext = std::make_shared<DbgRenderer>( reinterpret_cast<HWND>(this->winId()), this->windowTitle().toStdString(), this->contentsRect().width(), this->contentsRect().height());
+            thread = std::make_shared<QThread>(); // 创建线程
+            rendererContext->moveToThread(thread.get());
+            connect(thread.get(), &QThread::started, rendererContext.get(), &DbgRenderer::Run);
+            connect(rendererContext.get(), &DbgRenderer::ActivateImm, this, &RmlQWidget::ActivateImm);
+            thread->start();
+        }
         QWidget::showEvent(event);
     }
 
