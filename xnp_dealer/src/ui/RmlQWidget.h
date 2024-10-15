@@ -13,15 +13,10 @@ class RmlQWidget : public QWidget
     std::shared_ptr<DbgRenderer> rendererContext;
     std::shared_ptr<QThread> thread; // 使用智能指针管理 QThread
 public:
-    explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent)
-    {
-        //qDebug() << "RmlQWidget";
-    }
+    explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent) {}
 
-    ~RmlQWidget() override
-    {
-        //qDebug() << "~RmlQWidget";
-    }
+    ~RmlQWidget() override = default;
+
 
 public slots:
     void ActivateImm() {
