@@ -67,10 +67,9 @@ protected:
                 msg->message == WM_IME_REQUEST) {
                 context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
                 return true;
-            } else {
-                // 其他事件派发到自绘引擎
-                context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
             }
+            // 其他事件派发到自绘引擎
+            context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
         }
         return QWidget::nativeEvent(eventType, message, result);
     }

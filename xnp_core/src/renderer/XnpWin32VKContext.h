@@ -139,7 +139,17 @@ public:
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
-            cv.wait(lock, [=] {
+            // cv.wait_for(lock, std::chrono::milliseconds(16),[=] {
+            //     bool rvl = false;
+            //     while (!eventQueue.empty()) {
+            //         Win32VkEvent event = eventQueue.front();
+            //         eventQueue.pop();
+            //         ProcessEvents(event.message, event.w_param, event.l_param);
+            //         rvl = true;
+            //     }
+            //     return rvl;
+            // });
+            cv.wait(lock,[=] {
                 bool rvl = false;
                 while (!eventQueue.empty()) {
                     Win32VkEvent event = eventQueue.front();

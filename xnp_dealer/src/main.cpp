@@ -4,6 +4,7 @@
 #include "ui/RmlQWidget.h"
 
 int main(int argc, char *argv[]) {
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
     RmlQWidget window;
     window.setWindowTitle("游戏引擎");  // 设置窗口标题
