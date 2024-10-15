@@ -27,9 +27,6 @@ struct Win32VkEvent
             : message(msg), w_param(wp), l_param(lp) {}
 };
 
-using KeyDownCallback = bool (*)(Rml::Context *context, Rml::Input::KeyIdentifier key, int key_modifier,
-                                 float native_dp_ratio, bool priority);
-
 class XnpWin32VKContext : public QObject
 {
 Q_OBJECT
@@ -58,7 +55,7 @@ protected:
     bool context_dimensions_dirty = true;
     Rml::Vector2i window_dimensions;
     Rml::Context *context = nullptr;
-    KeyDownCallback key_down_callback = nullptr;
+
 
     HWND window_handle = nullptr;
     std::string window_title;

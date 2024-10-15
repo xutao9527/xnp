@@ -59,13 +59,13 @@ LRESULT CALLBACK XnpWin32VKContext::WindowProcedureHandler(UINT message, WPARAM 
             const int rml_modifier = RmlWin32::GetKeyModifierState();
             const float native_dp_ratio = GetDensityIndependentPixelRatio();
             // See if we have any global shortcuts that take priority over the context.
-            if (key_down_callback && !key_down_callback(context, rml_key, rml_modifier, native_dp_ratio, true))
+            if (!ProcessKeyDownShortcuts(context, rml_key, rml_modifier, native_dp_ratio, true))
                 return 0;
             // Otherwise, hand the event over to the context by calling the input handler as normal.
             if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,l_param))
                 return 0;
             // The key was not consumed by the context either, try keyboard shortcuts of lower priority.
-            if (key_down_callback && !key_down_callback(context, rml_key, rml_modifier, native_dp_ratio, false))
+            if (!ProcessKeyDownShortcuts(context, rml_key, rml_modifier, native_dp_ratio, false))
                 return 0;
             return 0;
         }
