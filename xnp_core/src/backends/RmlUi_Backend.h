@@ -71,7 +71,6 @@ void PresentFrame();
 
 void SetContext(Rml::Context* context, KeyDownCallback key_down_callback);
 
-LRESULT CALLBACK WindowProcedureHandler(HWND window_handle, UINT message, WPARAM w_param, LPARAM l_param);
 } // namespace Backend
 
 #endif

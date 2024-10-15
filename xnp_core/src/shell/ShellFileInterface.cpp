@@ -1,6 +1,5 @@
 #include "ShellFileInterface.h"
 #include <cstdio>
-#include <utility>
 
 ShellFileInterface::ShellFileInterface(const Rml::String& root) : root(root) {}
 
@@ -8,12 +7,10 @@ ShellFileInterface::~ShellFileInterface() = default;
 
 Rml::FileHandle ShellFileInterface::Open(const Rml::String& path)
 {
-	// Attempt to open the file relative to the application's root.
+
 	FILE* fp = fopen((root + path).c_str(), "rb");
 	if (fp != nullptr)
 		return (Rml::FileHandle)fp;
-
-	// Attempt to open the file relative to the current working directory.
 	fp = fopen(path.c_str(), "rb");
 	return (Rml::FileHandle)fp;
 }
