@@ -16,7 +16,4 @@ namespace Shell{
 
     void LoadFonts();
 
-    bool ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdentifier key, int key_modifier, float native_dp_ratio, bool priority);
-
-
 }
