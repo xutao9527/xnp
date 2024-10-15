@@ -78,6 +78,8 @@ public:
     {
         exit_signal = std::promise<void>();
         future_exit_signal = exit_signal.get_future();
+        window_dimensions.x = window_width;
+        window_dimensions.y = window_height;
         // 线程安全，只执行一次
         std::call_once(initFlag, [this]() {
             Rml::Initialise();
@@ -98,11 +100,6 @@ public:
             Rml::SetTextInputHandler(nullptr);
         render_interface.Shutdown();
         Shell::Shutdown();
-    }
-
-    void WaitStop()
-    {
-        future_exit_signal.wait();  //等待线程退出通知,然后释放资源
     }
 
     void ActivateKeyboard()
@@ -142,10 +139,6 @@ public:
     {
         Init();
         Loop();
-        // std::thread loopThread([=] {
-        //     Loop();
-        // });
-        // loopThread.detach();
     }
 
     void Loop()
@@ -182,7 +175,7 @@ public:
 
     void InitializeDpiSupport();
 signals:
-    void workDone();
+    void ActivateImm();
 };
 
 

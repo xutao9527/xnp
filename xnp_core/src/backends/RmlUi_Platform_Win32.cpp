@@ -46,9 +46,7 @@ SystemInterface_Win32::SystemInterface_Win32()
 	LARGE_INTEGER time_ticks_per_second;
 	QueryPerformanceFrequency(&time_ticks_per_second);
 	QueryPerformanceCounter(&time_startup);
-
 	time_frequency = 1.0 / (double)time_ticks_per_second.QuadPart;
-
 	// Load cursors
 	cursor_default = LoadCursor(nullptr, IDC_ARROW);
 	cursor_move = LoadCursor(nullptr, IDC_SIZEALL);
@@ -101,7 +99,6 @@ void SystemInterface_Win32::SetMouseCursor(const Rml::String& cursor_name)
 			cursor_handle = cursor_unavailable;
 		else if (Rml::StringUtilities::StartsWith(cursor_name, "rmlui-scroll"))
 			cursor_handle = cursor_move;
-
 		if (cursor_handle)
 		{
 			SetCursor(cursor_handle);
@@ -116,15 +113,11 @@ void SystemInterface_Win32::SetClipboardText(const Rml::String& text_utf8)
 	{
 		if (!OpenClipboard(window_handle))
 			return;
-
 		EmptyClipboard();
-
 		const std::wstring text = RmlWin32::ConvertToUTF16(text_utf8);
 		const size_t size = sizeof(wchar_t) * (text.size() + 1);
-
 		HGLOBAL clipboard_data = GlobalAlloc(GMEM_FIXED, size);
 		memcpy(clipboard_data, text.data(), size);
-
 		if (SetClipboardData(CF_UNICODETEXT, clipboard_data) == nullptr)
 		{
 			CloseClipboard();
@@ -148,7 +141,6 @@ void SystemInterface_Win32::GetClipboardText(Rml::String& text)
 			CloseClipboard();
 			return;
 		}
-
 		const wchar_t* clipboard_text = (const wchar_t*)GlobalLock(clipboard_data);
 		if (clipboard_text)
 			text = RmlWin32::ConvertToUTF8(clipboard_text);
@@ -163,38 +155,13 @@ void SystemInterface_Win32::ActivateKeyboard(Rml::Vector2f caret_position, float
     this->caret_position = caret_position;
     this->line_height = line_height;
     if(parent){
-        parent->workDone();
+        parent->ActivateImm();
     }
-
-	// HIMC himc = ImmGetContext(window_handle);
-	// if (himc == NULL)
-	// 	return;
-    //
-	// constexpr LONG BottomMargin = 2;
-    //
-	// // Adjust the position of the input method editor (IME) to the caret.
-	// const LONG x = static_cast<LONG>(caret_position.x);
-	// const LONG y = static_cast<LONG>(caret_position.y);
-	// const LONG w = 1;
-	// const LONG h = static_cast<LONG>(line_height) + BottomMargin;
-    //
-	// COMPOSITIONFORM comp = {};
-	// comp.dwStyle = CFS_FORCE_POSITION;
-	// comp.ptCurrentPos = {x, y};
-	// ImmSetCompositionWindow(himc, &comp);
-    //
-	// CANDIDATEFORM cand = {};
-	// cand.dwStyle = CFS_EXCLUDE;
-	// cand.ptCurrentPos = {x, y};
-	// cand.rcArea = {x, y, x + w, y + h};
-    // int a = ImmSetCandidateWindow(himc, &cand);
-    //
-	// ImmReleaseContext(window_handle, himc);
 }
 
 void SystemInterface_Win32::ActivateKeyboard(){
     HIMC himc = ImmGetContext(window_handle);
-    if (himc == NULL)
+    if (himc == nullptr)
         return;
     constexpr LONG BottomMargin = 2;
     // Adjust the position of the input method editor (IME) to the caret.
@@ -210,7 +177,7 @@ void SystemInterface_Win32::ActivateKeyboard(){
     cand.dwStyle = CFS_EXCLUDE;
     cand.ptCurrentPos = {x, y};
     cand.rcArea = {x, y, x + w, y + h};
-    int a = ImmSetCandidateWindow(himc, &cand);
+    ImmSetCandidateWindow(himc, &cand);
     ImmReleaseContext(window_handle, himc);
 }
 

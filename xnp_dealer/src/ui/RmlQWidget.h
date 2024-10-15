@@ -24,7 +24,7 @@ public:
     }
 
 public slots:
-    void ActivateKeyboard() {
+    void ActivateImm() {
         HIMC himc = ImmGetContext(reinterpret_cast<HWND>(this->winId()));
         if (himc == nullptr) {
             HIMC newHimc = ImmCreateContext();
@@ -38,7 +38,7 @@ protected:
         thread = std::make_shared<QThread>(); // 创建线程
         rendererContext->moveToThread(thread.get());
         connect(thread.get(), &QThread::started, rendererContext.get(), &DbgRenderer::Run);
-        connect(rendererContext.get(), &DbgRenderer::workDone, this, &RmlQWidget::ActivateKeyboard);
+        connect(rendererContext.get(), &DbgRenderer::ActivateImm, this, &RmlQWidget::ActivateImm);
         thread->start();
         QWidget::showEvent(event);
     }
