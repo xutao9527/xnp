@@ -99,16 +99,14 @@ float XnpWin32VKContext::GetDensityIndependentPixelRatio()
 
 void XnpWin32VKContext::InitializeDpiSupport()
 {
-    // Cast function pointers to void* first for MinGW not to emit errors.
-    procSetProcessDpiAwarenessContext = (ProcSetProcessDpiAwarenessContext) (void *) GetProcAddress(
-            GetModuleHandle(TEXT("User32.dll")), "SetProcessDpiAwarenessContext");
-    procGetDpiForWindow = (ProcGetDpiForWindow) (void *) GetProcAddress(GetModuleHandle(TEXT("User32.dll")),
-                                                                        "GetDpiForWindow");
-    procAdjustWindowRectExForDpi = (ProcAdjustWindowRectExForDpi) (void *) GetProcAddress(
-            GetModuleHandle(TEXT("User32.dll")),
-            "AdjustWindowRectExForDpi");
-    if (!has_dpi_support && procSetProcessDpiAwarenessContext != nullptr && procGetDpiForWindow != nullptr &&
-        procAdjustWindowRectExForDpi != nullptr) {
+    procSetProcessDpiAwarenessContext =
+            (ProcSetProcessDpiAwarenessContext)(void*)GetProcAddress(GetModuleHandle(TEXT("User32.dll")), "SetProcessDpiAwarenessContext");
+    procGetDpiForWindow = (ProcGetDpiForWindow)(void*)GetProcAddress(GetModuleHandle(TEXT("User32.dll")), "GetDpiForWindow");
+    procAdjustWindowRectExForDpi =
+            (ProcAdjustWindowRectExForDpi)(void*)GetProcAddress(GetModuleHandle(TEXT("User32.dll")), "AdjustWindowRectExForDpi");
+
+    if (!has_dpi_support && procSetProcessDpiAwarenessContext != NULL && procGetDpiForWindow != NULL && procAdjustWindowRectExForDpi != NULL)
+    {
         // Activate Per Monitor V2.
         if (procSetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
             has_dpi_support = true;
