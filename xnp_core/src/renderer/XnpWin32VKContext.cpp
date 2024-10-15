@@ -70,7 +70,6 @@ LRESULT CALLBACK XnpWin32VKContext::WindowProcedureHandler(UINT message, WPARAM 
             return 0;
         }
         case WM_LBUTTONDOWN:{
-            emit workDone(QString("WM_LBUTTONDOWN"));
             if (!RmlWin32::WindowProcedure(context, text_input_method_editor, window_handle, message, w_param,l_param))
                 return 0;
         }

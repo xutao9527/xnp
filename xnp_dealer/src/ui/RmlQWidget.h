@@ -11,14 +11,10 @@
 class RmlQWidget : public QWidget
 {
     std::shared_ptr<DbgRenderer> rendererContext;
-    //QLineEdit *inputLineEdit;  // 输入框
+    std::shared_ptr<QThread> thread; // 使用智能指针管理 QThread
 public:
     explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
-        //初始化输入框
-        // inputLineEdit = new QLineEdit(this);
-        // inputLineEdit->setPlaceholderText("请输入文本..."); // 设置占位符
-        // inputLineEdit->setGeometry(10, 10, 300, 30); // 设置位置和大小
         qDebug() << "RmlQWidget";
     }
 
@@ -27,22 +23,35 @@ public:
         qDebug() << "~RmlQWidget";
     }
 
-    void updateOutput(const QString &result) {
-        qDebug() << "RmlQWidget" << result;
+public slots:
+    void ActivateKeyboard() {
+        HIMC himc = ImmGetContext(reinterpret_cast<HWND>(this->winId()));
+        if (himc == nullptr) {
+            HIMC newHimc = ImmCreateContext();
+            ImmAssociateContext(reinterpret_cast<HWND>(this->winId()), newHimc);
+        }
     }
 protected:
     void showEvent(QShowEvent *event) override
     {
         rendererContext = std::make_shared<DbgRenderer>( reinterpret_cast<HWND>(this->winId()), this->windowTitle().toStdString(), this->contentsRect().width(), this->contentsRect().height());
-        rendererContext->start();
-        connect(rendererContext.get(), &DbgRenderer::workDone, this, &RmlQWidget::updateOutput);
+        thread = std::make_shared<QThread>(); // 创建线程
+        rendererContext->moveToThread(thread.get());
+        connect(thread.get(), &QThread::started, rendererContext.get(), &DbgRenderer::Run);
+        connect(rendererContext.get(), &DbgRenderer::workDone, this, &RmlQWidget::ActivateKeyboard);
+        thread->start();
         QWidget::showEvent(event);
     }
 
     void closeEvent(QCloseEvent *event) override
     {
-        rendererContext->WaitStop();        //等待渲染引擎先退出,释放资源
-        QWidget::closeEvent(event);         // 继续处理关闭事件
+        if (auto t = rendererContext->thread()) {
+            t->quit();
+            t->wait();
+        }
+        rendererContext.reset();
+        thread.reset();
+        QWidget::closeEvent(event);
     }
 
     bool nativeEvent(const QByteArray &eventType, void *message, long *result) override
@@ -53,33 +62,14 @@ protected:
             if (msg->message == WM_IME_COMPOSITION) {
                 context->ActivateKeyboard();    // 激活输入法动态候选框位置
             }
-            qDebug() << "msg_type" <<msg->message;
-            //屏蔽IME事件
+            //屏蔽IME事件,直接传递给自绘引擎
             if (msg->message == WM_IME_STARTCOMPOSITION ||
                 msg->message == WM_IME_ENDCOMPOSITION ||
                 msg->message == WM_IME_COMPOSITION ||
                 msg->message == WM_IME_CHAR ||
                 msg->message == WM_IME_REQUEST) {
-                switch (msg->message) {
-                    case WM_IME_STARTCOMPOSITION:
-                        qDebug() << "WM_IME_STARTCOMPOSITION";
-                        break;
-                    case WM_IME_ENDCOMPOSITION:
-                        qDebug() << "WM_IME_ENDCOMPOSITION";
-                        break;
-                    case WM_IME_COMPOSITION:
-                        qDebug() << "WM_IME_COMPOSITION";
-                        break;
-                    case WM_IME_CHAR:
-                        qDebug() << "WM_IME_CHAR";
-                        break;
-                    case WM_IME_REQUEST:
-                        qDebug() << "WM_IME_REQUEST";
-                        break;
-                }
-                // 直接传递给自绘引擎
                 context->DispatchEvent(msg->message, msg->wParam, msg->lParam);
-                return true; // 返回 true 表示已处理，不继续传递
+                return true;
             } else {
                 // 其他事件派发到自绘引擎
                 context->DispatchEvent(msg->message, msg->wParam, msg->lParam);

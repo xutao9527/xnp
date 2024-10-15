@@ -29,6 +29,7 @@
 #ifndef RMLUI_BACKENDS_PLATFORM_WIN32_H
 #define RMLUI_BACKENDS_PLATFORM_WIN32_H
 
+
 #include "RmlUi_Include_Windows.h"
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
@@ -37,6 +38,7 @@
 #include <RmlUi/Core/Types.h>
 #include <string>
 
+class XnpWin32VKContext;
 class SystemInterface_Win32 : public Rml::SystemInterface {
 public:
 	SystemInterface_Win32();
@@ -44,9 +46,8 @@ public:
 
 	// Optionally, provide or change the window to be used for setting the mouse cursor, clipboard text and IME position.
 	void SetWindow(HWND window_handle);
-
+    void SetParent(XnpWin32VKContext* parentPtr);
 	// -- Inherited from Rml::SystemInterface  --
-
 	double GetElapsedTime() override;
 
 	void SetMouseCursor(const Rml::String& cursor_name) override;
@@ -56,13 +57,14 @@ public:
 
 	void ActivateKeyboard(Rml::Vector2f caret_position, float line_height) override;
 
-
     void ActivateKeyboard();
+
 private:
     Rml::Vector2f caret_position;
     float line_height;
+    XnpWin32VKContext* parent;
 
-	HWND window_handle = nullptr;
+    HWND window_handle = nullptr;
 
 	double time_frequency = {};
 	LARGE_INTEGER time_startup = {};

@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "Shell.h"
-
 #include "RmlUi_Renderer_VK.h"
 #include "RmlUi_Include_Windows.h"
 #include "RmlUi_Platform_Win32.h"
@@ -31,7 +30,7 @@ struct Win32VkEvent
 using KeyDownCallback = bool (*)(Rml::Context *context, Rml::Input::KeyIdentifier key, int key_modifier,
                                  float native_dp_ratio, bool priority);
 
-class XnpWin32VKContext : public QThread
+class XnpWin32VKContext : public QObject
 {
 Q_OBJECT
 protected:
@@ -90,7 +89,7 @@ public:
     }
 
 
-    virtual ~XnpWin32VKContext()
+    ~XnpWin32VKContext() override
     {
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext(window_title);
@@ -131,19 +130,22 @@ public:
             throw std::runtime_error("Failed to initialize Vulkan render interface");
         }
         Rml::SetSystemInterface(&system_interface);
+        //auto sharedThis = std::shared_ptr<XnpWin32VKContext>(this, [](XnpWin32VKContext*) {});  // 创建不管理生命周期的 shared_ptr
         system_interface.SetWindow(window_handle);
+        system_interface.SetParent(this);  // 设置 parent
         render_interface.SetViewport(window_width, window_height);
     }
 
     virtual void Init() = 0;
 
-    void run() override
+    void Run()
     {
         Init();
-        std::thread loopThread([=] {
-            Loop();
-        });
-        loopThread.detach();
+        Loop();
+        // std::thread loopThread([=] {
+        //     Loop();
+        // });
+        // loopThread.detach();
     }
 
     void Loop()
@@ -180,7 +182,7 @@ public:
 
     void InitializeDpiSupport();
 signals:
-    void workDone(const QString &result);
+    void workDone();
 };
 
 
