@@ -1,6 +1,7 @@
 #include "XnpWin32VKContext.h"
 
 std::once_flag XnpWin32VKContext::initFlag;
+std::atomic<int> XnpWin32VKContext::ref_count(0);
 std::atomic<HWND> XnpWin32VKContext::hwnd{ nullptr };
 
 void XnpWin32VKContext::DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param)

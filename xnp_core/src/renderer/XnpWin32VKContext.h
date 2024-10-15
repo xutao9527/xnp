@@ -45,7 +45,7 @@ protected:
     std::condition_variable cv;
     std::queue<Win32VkEvent> eventQueue;
     std::atomic<bool> running{};
-    static std::once_flag initFlag;
+
 
     // Backend define
     SystemInterface_Win32 system_interface;
@@ -56,11 +56,13 @@ protected:
     Rml::Vector2i window_dimensions;
     Rml::Context *context = nullptr;
 
-
     HWND window_handle = nullptr;
     std::string window_title;
     int window_width;
     int window_height;
+
+    static std::once_flag initFlag;
+    static std::atomic<int> ref_count;  // 静态引用计数器
     static std::atomic<HWND> hwnd;
 
 public:
@@ -70,7 +72,6 @@ public:
               window_width(width),
               window_height(height)
     {
-
         window_dimensions.x = window_width;
         window_dimensions.y = window_height;
         // 线程安全，只执行一次
@@ -80,19 +81,19 @@ public:
             Shell::Initialize();
             Shell::LoadFonts();
         });
+        ++ref_count;
         Setting();
     }
 
-
     ~XnpWin32VKContext() override
     {
-        Rml::ReleaseTextures(&render_interface);
-        Rml::RemoveContext(window_title);
-        Rml::Shutdown();
-        if (Rml::GetTextInputHandler() == &text_input_method_editor)
-            Rml::SetTextInputHandler(nullptr);
-        render_interface.Shutdown();
-        Shell::Shutdown();
+        if (--ref_count == 0) {
+            Rml::Shutdown();
+            if (Rml::GetTextInputHandler() == &text_input_method_editor)
+                Rml::SetTextInputHandler(nullptr);
+            render_interface.Shutdown();
+            Shell::Shutdown();
+        }
     }
 
     void ActivateKeyboard()
@@ -155,6 +156,8 @@ public:
             context->Render();
             render_interface.EndFrame();
         }
+        Rml::ReleaseTextures(&render_interface);
+        Rml::RemoveContext(window_title);
     }
 
     void DispatchEvent(UINT message, WPARAM w_param, LPARAM l_param);
