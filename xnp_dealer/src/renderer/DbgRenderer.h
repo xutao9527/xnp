@@ -12,10 +12,10 @@ public:
     DbgRenderer(HWND win_hwnd, std::string title, int width, int height)
             : XnpWin32VKContext(win_hwnd, std::move(title), width, height)
     {
-        qDebug() << "DbgRenderer";
+        //qDebug() << "DbgRenderer";
     }
 
     ~DbgRenderer() override {
-        qDebug() << "~DbgRenderer";
+        //qDebug() << "~DbgRenderer";
     }
 };

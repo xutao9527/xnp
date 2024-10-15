@@ -15,12 +15,12 @@ class RmlQWidget : public QWidget
 public:
     explicit RmlQWidget(QWidget *parent = nullptr) : QWidget(parent)
     {
-        qDebug() << "RmlQWidget";
+        //qDebug() << "RmlQWidget";
     }
 
     ~RmlQWidget() override
     {
-        qDebug() << "~RmlQWidget";
+        //qDebug() << "~RmlQWidget";
     }
 
 public slots:
