@@ -120,7 +120,6 @@ public:
             throw std::runtime_error("Failed to initialize Vulkan render interface");
         }
         Rml::SetSystemInterface(&system_interface);
-        //auto sharedThis = std::shared_ptr<XnpWin32VKContext>(this, [](XnpWin32VKContext*) {});  // 创建不管理生命周期的 shared_ptr
         system_interface.SetWindow(window_handle);
         system_interface.SetParent(this);  // 设置 parent
         render_interface.SetViewport(window_width, window_height);
@@ -139,16 +138,6 @@ public:
         running = true;
         std::unique_lock<std::mutex> lock(mutex);
         while (running) {
-            // cv.wait_for(lock, std::chrono::milliseconds(16),[=] {
-            //     bool rvl = false;
-            //     while (!eventQueue.empty()) {
-            //         Win32VkEvent event = eventQueue.front();
-            //         eventQueue.pop();
-            //         ProcessEvents(event.message, event.w_param, event.l_param);
-            //         rvl = true;
-            //     }
-            //     return rvl;
-            // });
             cv.wait(lock,[=] {
                 bool rvl = false;
                 while (!eventQueue.empty()) {
@@ -159,7 +148,7 @@ public:
                 }
                 return rvl;
             });
-            std::this_thread::sleep_for(std::chrono::milliseconds(16)); // 防止事件频繁,卡顿
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 防止事件频繁,卡顿
             context->Update();
             render_interface.BeginFrame();
             context->Render();
