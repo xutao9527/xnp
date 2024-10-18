@@ -31,12 +31,14 @@ target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 
 add_custom_target(copy_dependencies ALL
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        "${CMAKE_INSTALL_PREFIX}/bin/" "${CMAKE_CURRENT_BINARY_DIR}"
+#        COMMAND ${CMAKE_COMMAND} -E copy_directory
+#        "${CMAKE_SOURCE_DIR}/3rdparty/binary-library/win64/qt/" "${CMAKE_CURRENT_BINARY_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_INSTALL_PREFIX}/bin/" "${CMAKE_CURRENT_BINARY_DIR}"
+        "${PROJECT_SOURCE_DIR}/resources/font" "${CMAKE_CURRENT_BINARY_DIR}/resources/font"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_SOURCE_DIR}/3rdparty/binary-library/win64/qt/" "${CMAKE_CURRENT_BINARY_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
+        "${PROJECT_SOURCE_DIR}/resources/layout" "${CMAKE_CURRENT_BINARY_DIR}/resources/layout"
         COMMENT "Copying Qt DLLs to the build directory"
         VERBATIM
 )

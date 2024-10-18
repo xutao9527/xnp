@@ -26,7 +26,7 @@ void Shell::Shutdown()
 
 void Shell::LoadFonts()
 {
-    const Rml::String directory = "resources/assets/";
+    const Rml::String directory = "resources/font/";
 
     struct FontFace
     {
@@ -38,7 +38,7 @@ void Shell::LoadFonts()
         // {"LatoLatin-Italic.ttf", false},
         // {"LatoLatin-Bold.ttf", false},
         // {"LatoLatin-BoldItalic.ttf", false},
-        {"NotoEmoji-Regular.ttf", true},
+        // {"NotoEmoji-Regular.ttf", true},
         {"SourceHanSansSC-Regular.ttf", false},
         {"SourceHanSansSC-Bold.ttf",    false},
     };

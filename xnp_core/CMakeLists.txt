@@ -1,11 +1,7 @@
 project(xnp-core)
 
 find_package(RmlUi QUIET)
-if(NOT RmlUi_FOUND)
-    message(WARNING "RmlUi not found, Please install it.")
-    return()
-endif()
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
