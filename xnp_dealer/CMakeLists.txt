@@ -4,10 +4,6 @@ cmake_minimum_required(VERSION 3.10)
 project(xnp_dealer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
-
-
-
 set(CODE_SOURCES
         src/main.cpp
         src/ui/RmlQWidget.h
@@ -22,7 +18,9 @@ set(CODE_SOURCES
 #qt5_add_resources(RESOURCES ${RESOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
-
+set_target_properties(${PROJECT_NAME} PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+)
 target_link_libraries(${PROJECT_NAME}
         xnp-core
 )
