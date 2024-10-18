@@ -15,8 +15,10 @@ set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX}")
 
 # 安装第三方库
 add_subdirectory(3rdparty)
-# xnp_core
-add_subdirectory(xnp_core)
-# xnp_dealer
-add_subdirectory(xnp_dealer)
+## xnp_core
+#add_subdirectory(xnp_core)
+## xnp_dealer
+#add_subdirectory(xnp_dealer)
+# vk_test
+#add_subdirectory(vk_test)
 
