@@ -1,5 +1,3 @@
-
-
 # 设置项目名称
 project(xnp_dealer LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
