@@ -1,6 +1,4 @@
-#pragma once
-
-#include <QWidget>
+﻿#include <QWidget>
 #include <QDebug>
 #include <QEvent>
 #include <QMouseEvent>

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <memory>
 #include <thread>
@@ -234,7 +234,3 @@ public:
 signals:
     void ActivateImm();
 };
-
-
-
-
