@@ -29,7 +29,7 @@ public slots:
 protected:
     void showEvent(QShowEvent *event) override
     {
-        if(!rendererContext.get()){
+        if(!rendererContext){
             rendererContext = std::make_shared<DbgRenderer>( reinterpret_cast<HWND>(this->winId()), this->windowTitle().toStdString(), this->contentsRect().width(), this->contentsRect().height());
             thread = std::make_shared<QThread>(); // 创建线程
             rendererContext->moveToThread(thread.get());
@@ -42,12 +42,13 @@ protected:
 
     void closeEvent(QCloseEvent *event) override
     {
-        if (auto t = rendererContext->thread()) {
+        if (rendererContext) {
+            auto t = rendererContext->thread();
             t->quit();
             t->wait();
+            rendererContext.reset();
+            thread.reset();
         }
-        rendererContext.reset();
-        thread.reset();
         QWidget::closeEvent(event);
     }
 
