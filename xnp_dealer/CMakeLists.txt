@@ -10,11 +10,6 @@ find_package(OpenGL REQUIRED)
 
 set(CODE_SOURCES
         src/main.cpp
-#        src/ui/RmlQWidget.h
-#        src/ui/RmlQWidget.cpp
-#        src/renderer/DbgRenderer.h
-#        src/renderer/DbgRenderer.cpp
-
 )
 
 #set(RESOURCE_FILES

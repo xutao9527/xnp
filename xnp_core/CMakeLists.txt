@@ -18,21 +18,13 @@ set(SHELL_SOURCES
 set(BACKENDS_SOURCES
         src/backends/RmlUi_Platform_Win32.h
         src/backends/RmlUi_Platform_Win32.cpp
-#        src/backends/RmlUi_Renderer_VK.h
-#        src/backends/RmlUi_Renderer_VK.cpp
-#        src/backends/RmlUi_Include_Vulkan.h
-#        src/backends/RmlUi_Include_Windows.h
         src/backends/RmlUi_Renderer_GL2.cpp
         src/backends/RmlUi_Renderer_GL2.h
 )
 
 set(CODE_SOURCES
-#        src/renderer/XnpWin32VKContext.h
-#        src/renderer/XnpWin32VKContext.cpp
-        src/rml/OpenGLWidget.cpp
-        src/rml/OpenGLWidget.h
-        src/rml/XnpQWidget.cpp
-        src/rml/XnpQWidget.h
+        src/rml/XnpWinGLWidget.cpp
+        src/rml/XnpWinGLWidget.h
 )
 
 add_library(${PROJECT_NAME}

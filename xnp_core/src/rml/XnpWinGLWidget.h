@@ -11,7 +11,7 @@
 #include "RmlUi_Platform_Win32.h"
 
 
-class XnpQWidget : public QOpenGLWidget, protected QOpenGLFunctions
+class XnpWinGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     static std::once_flag initFlag;
     static std::atomic<int> ref_count;  // 静态引用计数器
@@ -24,7 +24,7 @@ class XnpQWidget : public QOpenGLWidget, protected QOpenGLFunctions
 
     HWND window_handle = nullptr;
 public:
-    explicit XnpQWidget(QWidget *parent = nullptr) : QOpenGLWidget(parent) {
+    explicit XnpWinGLWidget(QWidget *parent = nullptr) : QOpenGLWidget(parent) {
         // 线程安全，只执行一次
         std::call_once(initFlag, [this]() {
             Rml::Initialise();
@@ -36,7 +36,7 @@ public:
 
     }
 
-    ~XnpQWidget() override{
+    ~XnpWinGLWidget() override{
         Rml::ReleaseTextures(&render_interface);
         Rml::RemoveContext("main");
         if (--ref_count == 0) {
@@ -68,15 +68,6 @@ protected:
 
     // 渲染场景
     void paintGL() override {
-        //std::unique_lock<std::mutex> lock(eventQueueMutex);  // 加锁确保线程安全
-        // // 处理队列事件
-        // while (!eventQueue.empty()){
-        //     MSG msg = eventQueue.front();
-        //     eventQueue.pop();
-        //     lock.unlock(); // 处理事件时解锁，避免长时间持锁
-        //     ProcessEvents(&msg);
-        //     lock.lock(); // 重新加锁
-        // }
         context->Update();
         render_interface.BeginFrame();
         render_interface.Clear();
