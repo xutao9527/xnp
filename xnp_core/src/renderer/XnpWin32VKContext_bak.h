@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "Shell.h"
+#include "RmlUi_Renderer_GL2.h"
 #include "RmlUi_Renderer_VK.h"
 #include "RmlUi_Include_Windows.h"
 #include "RmlUi_Platform_Win32.h"
@@ -49,6 +50,7 @@ protected:
     // Backend define
     SystemInterface_Win32 system_interface;
     RenderInterface_VK render_interface;
+    RenderInterface_GL2 render_interface1;
     TextInputMethodEditor_Win32 text_input_method_editor;
 
     bool context_dimensions_dirty = true;
@@ -121,7 +123,7 @@ public:
         }
         Rml::SetSystemInterface(&system_interface);
         system_interface.SetWindow(window_handle);
-        //system_interface.SetParent(this);  // 设置 parent
+        system_interface.SetParent(this);  // 设置 parent
         render_interface.SetViewport(window_width, window_height);
     }
 
@@ -165,10 +167,15 @@ public:
     bool ProcessKeyDownShortcuts(Rml::Context* context, Rml::Input::KeyIdentifier key, int key_modifier, float native_dp_ratio, bool priority){
         if (!context)
             return true;
-
+        // Result should return true to allow the event to propagate to the next handler.
         bool result = false;
+        // This function is intended to be called twice by the backend, before and after submitting the key event to the context. This way we can
+        // intercept shortcuts that should take priority over the context, and then handle any shortcuts of lower priority if the context did not
+        // intercept it.
         if (priority)
         {
+            // Priority shortcuts are handled before submitting the key to the context.
+            // Toggle debugger and set dp-ratio using Ctrl +/-/0 keys.
             if (key == Rml::Input::KI_F8)
             {
                 Rml::Debugger::SetVisible(!Rml::Debugger::IsVisible());
@@ -193,11 +200,13 @@ public:
             }
             else
             {
+                // Propagate the key down event to the context.
                 result = true;
             }
         }
         else
         {
+            // We arrive here when no priority keys are detected and the key was not consumed by the context. Check for shortcuts of lower priority.
             if (key == Rml::Input::KI_R && key_modifier & Rml::Input::KM_CTRL)
             {
                 for (int i = 0; i < context->GetNumDocuments(); i++)

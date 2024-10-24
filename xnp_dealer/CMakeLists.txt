@@ -1,13 +1,20 @@
 # 设置项目名称
 project(xnp_dealer LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Qt5 COMPONENTS Widgets)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(OpenGL REQUIRED)
 
 set(CODE_SOURCES
         src/main.cpp
-        src/ui/RmlQWidget.h
-        src/ui/RmlQWidget.cpp
-        src/renderer/DbgRenderer.h
-        src/renderer/DbgRenderer.cpp
+#        src/ui/RmlQWidget.h
+#        src/ui/RmlQWidget.cpp
+#        src/renderer/DbgRenderer.h
+#        src/renderer/DbgRenderer.cpp
+
 )
 
 #set(RESOURCE_FILES
@@ -21,9 +28,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 target_link_libraries(${PROJECT_NAME}
         xnp-core
+
 )
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
+target_include_directories(${PROJECT_NAME} PUBLIC src/rml)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 
 add_custom_target(copy_dependencies ALL

@@ -29,16 +29,17 @@
 #include "RmlUi_Platform_Win32.h"
 #include "RmlUi_Include_Windows.h"
 #include <RmlUi/Core/Context.h>
+#include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
+#include <RmlUi/Core/SystemInterface.h>
 #include <RmlUi/Core/TextInputContext.h>
-#include <string>
-#include "XnpWin32VKContext.h"
-
+#include <RmlUi/Core/TextInputHandler.h>
+#include <string.h>
 
 // Used to interact with the input method editor (IME). Users of MinGW should manually link to this.
 #ifdef _MSC_VER
-	#pragma comment(lib, "imm32")
+#pragma comment(lib, "imm32")
 #endif
 
 SystemInterface_Win32::SystemInterface_Win32()
@@ -46,7 +47,9 @@ SystemInterface_Win32::SystemInterface_Win32()
 	LARGE_INTEGER time_ticks_per_second;
 	QueryPerformanceFrequency(&time_ticks_per_second);
 	QueryPerformanceCounter(&time_startup);
+
 	time_frequency = 1.0 / (double)time_ticks_per_second.QuadPart;
+
 	// Load cursors
 	cursor_default = LoadCursor(nullptr, IDC_ARROW);
 	cursor_move = LoadCursor(nullptr, IDC_SIZEALL);
@@ -57,24 +60,18 @@ SystemInterface_Win32::SystemInterface_Win32()
 	cursor_unavailable = LoadCursor(nullptr, IDC_NO);
 }
 
-SystemInterface_Win32::~SystemInterface_Win32() {
-    parent = nullptr;
-};
+SystemInterface_Win32::~SystemInterface_Win32() = default;
 
 void SystemInterface_Win32::SetWindow(HWND in_window_handle)
 {
 	window_handle = in_window_handle;
 }
 
-void SystemInterface_Win32::SetParent(XnpWin32VKContext* parentPtr)
-{
-    parent = parentPtr;
-}
-
 double SystemInterface_Win32::GetElapsedTime()
 {
 	LARGE_INTEGER counter;
 	QueryPerformanceCounter(&counter);
+
 	return double(counter.QuadPart - time_startup.QuadPart) * time_frequency;
 }
 
@@ -99,6 +96,7 @@ void SystemInterface_Win32::SetMouseCursor(const Rml::String& cursor_name)
 			cursor_handle = cursor_unavailable;
 		else if (Rml::StringUtilities::StartsWith(cursor_name, "rmlui-scroll"))
 			cursor_handle = cursor_move;
+
 		if (cursor_handle)
 		{
 			SetCursor(cursor_handle);
@@ -113,11 +111,15 @@ void SystemInterface_Win32::SetClipboardText(const Rml::String& text_utf8)
 	{
 		if (!OpenClipboard(window_handle))
 			return;
+
 		EmptyClipboard();
+
 		const std::wstring text = RmlWin32::ConvertToUTF16(text_utf8);
 		const size_t size = sizeof(wchar_t) * (text.size() + 1);
+
 		HGLOBAL clipboard_data = GlobalAlloc(GMEM_FIXED, size);
 		memcpy(clipboard_data, text.data(), size);
+
 		if (SetClipboardData(CF_UNICODETEXT, clipboard_data) == nullptr)
 		{
 			CloseClipboard();
@@ -141,6 +143,7 @@ void SystemInterface_Win32::GetClipboardText(Rml::String& text)
 			CloseClipboard();
 			return;
 		}
+
 		const wchar_t* clipboard_text = (const wchar_t*)GlobalLock(clipboard_data);
 		if (clipboard_text)
 			text = RmlWin32::ConvertToUTF8(clipboard_text);
@@ -152,33 +155,36 @@ void SystemInterface_Win32::GetClipboardText(Rml::String& text)
 
 void SystemInterface_Win32::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
 {
-    this->caret_position = caret_position;
-    this->line_height = line_height;
-    if(parent){
-        parent->ActivateImm();
-    }
-}
+	// HIMC himc = ImmGetContext(window_handle);
+	// if (himc == NULL)
+	// 	return;
 
-void SystemInterface_Win32::ActivateKeyboard(){
     HIMC himc = ImmGetContext(window_handle);
-    if (himc == nullptr)
-        return;
-    constexpr LONG BottomMargin = 2;
-    // Adjust the position of the input method editor (IME) to the caret.
-    const LONG x = static_cast<LONG>(caret_position.x);
-    const LONG y = static_cast<LONG>(caret_position.y);
-    const LONG w = 1;
-    const LONG h = static_cast<LONG>(line_height) + BottomMargin;
-    COMPOSITIONFORM comp = {};
-    comp.dwStyle = CFS_FORCE_POSITION;
-    comp.ptCurrentPos = {x, y};
-    ImmSetCompositionWindow(himc, &comp);
-    CANDIDATEFORM cand = {};
-    cand.dwStyle = CFS_EXCLUDE;
-    cand.ptCurrentPos = {x, y};
-    cand.rcArea = {x, y, x + w, y + h};
-    ImmSetCandidateWindow(himc, &cand);
-    ImmReleaseContext(window_handle, himc);
+    if(himc == nullptr){
+        himc = ImmCreateContext();
+        ImmAssociateContext(window_handle, himc);
+    }
+
+	constexpr LONG BottomMargin = 2;
+
+	// Adjust the position of the input method editor (IME) to the caret.
+	const LONG x = static_cast<LONG>(caret_position.x);
+	const LONG y = static_cast<LONG>(caret_position.y);
+	const LONG w = 1;
+	const LONG h = static_cast<LONG>(line_height) + BottomMargin;
+
+	COMPOSITIONFORM comp = {};
+	comp.dwStyle = CFS_FORCE_POSITION;
+	comp.ptCurrentPos = {x, y};
+	ImmSetCompositionWindow(himc, &comp);
+
+	CANDIDATEFORM cand = {};
+	cand.dwStyle = CFS_EXCLUDE;
+	cand.ptCurrentPos = {x, y};
+	cand.rcArea = {x, y, x + w, y + h};
+	ImmSetCandidateWindow(himc, &cand);
+
+	ImmReleaseContext(window_handle, himc);
 }
 
 Rml::String RmlWin32::ConvertToUTF8(const std::wstring& wstr)
@@ -225,13 +231,13 @@ static void IMECompleteComposition(HWND window_handle)
 {
 	if (HIMC context = ImmGetContext(window_handle))
 	{
-		ImmNotifyIME(context, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
+		ImmNotifyIME(context, NI_COMPOSITIONSTR, CPS_COMPLETE, NULL);
 		ImmReleaseContext(window_handle, context);
 	}
 }
 
 bool RmlWin32::WindowProcedure(Rml::Context* context, TextInputMethodEditor_Win32& text_input_method_editor, HWND window_handle, UINT message,
-	WPARAM w_param, LPARAM l_param)
+							   WPARAM w_param, LPARAM l_param)
 {
 	if (!context)
 		return true;
@@ -248,138 +254,138 @@ bool RmlWin32::WindowProcedure(Rml::Context* context, TextInputMethodEditor_Win3
 
 	switch (message)
 	{
-	case WM_LBUTTONDOWN:
-		result = context->ProcessMouseButtonDown(0, RmlWin32::GetKeyModifierState());
-		SetCapture(window_handle);
-		break;
-	case WM_LBUTTONUP:
-		ReleaseCapture();
-		result = context->ProcessMouseButtonUp(0, RmlWin32::GetKeyModifierState());
-		break;
-	case WM_RBUTTONDOWN: result = context->ProcessMouseButtonDown(1, RmlWin32::GetKeyModifierState()); break;
-	case WM_RBUTTONUP: result = context->ProcessMouseButtonUp(1, RmlWin32::GetKeyModifierState()); break;
-	case WM_MBUTTONDOWN: result = context->ProcessMouseButtonDown(2, RmlWin32::GetKeyModifierState()); break;
-	case WM_MBUTTONUP: result = context->ProcessMouseButtonUp(2, RmlWin32::GetKeyModifierState()); break;
-	case WM_MOUSEMOVE:
-		result = context->ProcessMouseMove(static_cast<int>((short)LOWORD(l_param)), static_cast<int>((short)HIWORD(l_param)),
-			RmlWin32::GetKeyModifierState());
+		case WM_LBUTTONDOWN:
+			result = context->ProcessMouseButtonDown(0, RmlWin32::GetKeyModifierState());
+			SetCapture(window_handle);
+			break;
+		case WM_LBUTTONUP:
+			ReleaseCapture();
+			result = context->ProcessMouseButtonUp(0, RmlWin32::GetKeyModifierState());
+			break;
+		case WM_RBUTTONDOWN: result = context->ProcessMouseButtonDown(1, RmlWin32::GetKeyModifierState()); break;
+		case WM_RBUTTONUP: result = context->ProcessMouseButtonUp(1, RmlWin32::GetKeyModifierState()); break;
+		case WM_MBUTTONDOWN: result = context->ProcessMouseButtonDown(2, RmlWin32::GetKeyModifierState()); break;
+		case WM_MBUTTONUP: result = context->ProcessMouseButtonUp(2, RmlWin32::GetKeyModifierState()); break;
+		case WM_MOUSEMOVE:
+			result = context->ProcessMouseMove(static_cast<int>((short)LOWORD(l_param)), static_cast<int>((short)HIWORD(l_param)),
+											   RmlWin32::GetKeyModifierState());
 
-		if (!tracking_mouse_leave)
-		{
-			TRACKMOUSEEVENT tme = {};
-			tme.cbSize = sizeof(TRACKMOUSEEVENT);
-			tme.dwFlags = TME_LEAVE;
-			tme.hwndTrack = window_handle;
-			tracking_mouse_leave = TrackMouseEvent(&tme);
-		}
-		break;
-	case WM_MOUSEWHEEL:
-		result = context->ProcessMouseWheel(static_cast<float>((short)HIWORD(w_param)) / static_cast<float>(-WHEEL_DELTA),
-			RmlWin32::GetKeyModifierState());
-		break;
-	case WM_MOUSELEAVE:
-		result = context->ProcessMouseLeave();
-		tracking_mouse_leave = false;
-		break;
-	case WM_KEYDOWN: result = context->ProcessKeyDown(RmlWin32::ConvertKey((int)w_param), RmlWin32::GetKeyModifierState()); break;
-	case WM_KEYUP: result = context->ProcessKeyUp(RmlWin32::ConvertKey((int)w_param), RmlWin32::GetKeyModifierState()); break;
-	case WM_CHAR:
-	{
-		static wchar_t first_u16_code_unit = 0;
-
-		const wchar_t c = (wchar_t)w_param;
-		Rml::Character character = (Rml::Character)c;
-
-		// Windows sends two-wide characters as two messages.
-		if (c >= 0xD800 && c < 0xDC00)
-		{
-			// First 16-bit code unit of a two-wide character.
-			first_u16_code_unit = c;
-		}
-		else
-		{
-			if (c >= 0xDC00 && c < 0xE000 && first_u16_code_unit != 0)
+			if (!tracking_mouse_leave)
 			{
-				// Second 16-bit code unit of a two-wide character.
-				Rml::String utf8 = ConvertToUTF8(std::wstring{first_u16_code_unit, c});
-				character = Rml::StringUtilities::ToCharacter(utf8.data(), utf8.data() + utf8.size());
+				TRACKMOUSEEVENT tme = {};
+				tme.cbSize = sizeof(TRACKMOUSEEVENT);
+				tme.dwFlags = TME_LEAVE;
+				tme.hwndTrack = window_handle;
+				tracking_mouse_leave = TrackMouseEvent(&tme);
 			}
-			else if (c == '\r')
+			break;
+		case WM_MOUSEWHEEL:
+			result = context->ProcessMouseWheel(static_cast<float>((short)HIWORD(w_param)) / static_cast<float>(-WHEEL_DELTA),
+												RmlWin32::GetKeyModifierState());
+			break;
+		case WM_MOUSELEAVE:
+			result = context->ProcessMouseLeave();
+			tracking_mouse_leave = false;
+			break;
+		case WM_KEYDOWN: result = context->ProcessKeyDown(RmlWin32::ConvertKey((int)w_param), RmlWin32::GetKeyModifierState()); break;
+		case WM_KEYUP: result = context->ProcessKeyUp(RmlWin32::ConvertKey((int)w_param), RmlWin32::GetKeyModifierState()); break;
+		case WM_CHAR:
+		{
+			static wchar_t first_u16_code_unit = 0;
+
+			const wchar_t c = (wchar_t)w_param;
+			Rml::Character character = (Rml::Character)c;
+
+			// Windows sends two-wide characters as two messages.
+			if (c >= 0xD800 && c < 0xDC00)
 			{
-				// Windows sends new-lines as carriage returns, convert to endlines.
-				character = (Rml::Character)'\n';
+				// First 16-bit code unit of a two-wide character.
+				first_u16_code_unit = c;
 			}
+			else
+			{
+				if (c >= 0xDC00 && c < 0xE000 && first_u16_code_unit != 0)
+				{
+					// Second 16-bit code unit of a two-wide character.
+					Rml::String utf8 = ConvertToUTF8(std::wstring{first_u16_code_unit, c});
+					character = Rml::StringUtilities::ToCharacter(utf8.data(), utf8.data() + utf8.size());
+				}
+				else if (c == '\r')
+				{
+					// Windows sends new-lines as carriage returns, convert to endlines.
+					character = (Rml::Character)'\n';
+				}
 
-			first_u16_code_unit = 0;
+				first_u16_code_unit = 0;
 
-			// Only send through printable characters.
-			if (((char32_t)character >= 32 || character == (Rml::Character)'\n') && character != (Rml::Character)127)
-				result = context->ProcessTextInput(character);
+				// Only send through printable characters.
+				if (((char32_t)character >= 32 || character == (Rml::Character)'\n') && character != (Rml::Character)127)
+					result = context->ProcessTextInput(character);
+			}
 		}
-	}
-	break;
-	case WM_IME_STARTCOMPOSITION:
-		text_input_method_editor.StartComposition();
-		// Prevent the native composition window from appearing by capturing the message.
-		result = false;
-		break;
-	case WM_IME_ENDCOMPOSITION:
-		if (text_input_method_editor.IsComposing())
-			text_input_method_editor.ConfirmComposition(Rml::StringView());
-		break;
-	case WM_IME_COMPOSITION:
-	{
-		HIMC imm_context = ImmGetContext(window_handle);
-
-		// Not every IME starts a composition.
-		if (!text_input_method_editor.IsComposing())
+			break;
+		case WM_IME_STARTCOMPOSITION:
 			text_input_method_editor.StartComposition();
-
-		if (!!(l_param & GCS_CURSORPOS))
+			// Prevent the native composition window from appearing by capturing the message.
+			result = false;
+			break;
+		case WM_IME_ENDCOMPOSITION:
+			if (text_input_method_editor.IsComposing())
+				text_input_method_editor.ConfirmComposition(Rml::StringView());
+			break;
+		case WM_IME_COMPOSITION:
 		{
-			// The cursor position is the wchar_t offset in the composition string. Because we
-			// work with UTF-8 and not UTF-16, we will have to convert the character offset.
-			int cursor_pos = IMEGetCursorPosition(imm_context);
+			HIMC imm_context = ImmGetContext(window_handle);
 
-			std::wstring composition = IMEGetCompositionString(imm_context, false);
-			Rml::String converted = RmlWin32::ConvertToUTF8(composition.substr(0, cursor_pos));
-			cursor_pos = (int)Rml::StringUtilities::LengthUTF8(converted);
+			// Not every IME starts a composition.
+			if (!text_input_method_editor.IsComposing())
+				text_input_method_editor.StartComposition();
 
-			text_input_method_editor.SetCursorPosition(cursor_pos, true);
+			if (!!(l_param & GCS_CURSORPOS))
+			{
+				// The cursor position is the wchar_t offset in the composition string. Because we
+				// work with UTF-8 and not UTF-16, we will have to convert the character offset.
+				int cursor_pos = IMEGetCursorPosition(imm_context);
+
+				std::wstring composition = IMEGetCompositionString(imm_context, false);
+				Rml::String converted = RmlWin32::ConvertToUTF8(composition.substr(0, cursor_pos));
+				cursor_pos = (int)Rml::StringUtilities::LengthUTF8(converted);
+
+				text_input_method_editor.SetCursorPosition(cursor_pos, true);
+			}
+
+			if (!!(l_param & CS_NOMOVECARET))
+			{
+				// Suppress the cursor position update. CS_NOMOVECARET is always a part of a more
+				// complex message which means that the cursor is updated from a different event.
+				text_input_method_editor.SetCursorPosition(-1, false);
+			}
+
+			if (!!(l_param & GCS_RESULTSTR))
+			{
+				std::wstring composition = IMEGetCompositionString(imm_context, true);
+				text_input_method_editor.ConfirmComposition(RmlWin32::ConvertToUTF8(composition));
+			}
+
+			if (!!(l_param & GCS_COMPSTR))
+			{
+				std::wstring composition = IMEGetCompositionString(imm_context, false);
+				text_input_method_editor.SetComposition(RmlWin32::ConvertToUTF8(composition));
+			}
+
+			// The composition has been canceled.
+			if (!l_param)
+				text_input_method_editor.CancelComposition();
+
+			ImmReleaseContext(window_handle, imm_context);
 		}
-
-		if (!!(l_param & CS_NOMOVECARET))
-		{
-			// Suppress the cursor position update. CS_NOMOVECARET is always a part of a more
-			// complex message which means that the cursor is updated from a different event.
-			text_input_method_editor.SetCursorPosition(-1, false);
-		}
-
-		if (!!(l_param & GCS_RESULTSTR))
-		{
-			std::wstring composition = IMEGetCompositionString(imm_context, true);
-			text_input_method_editor.ConfirmComposition(RmlWin32::ConvertToUTF8(composition));
-		}
-
-		if (!!(l_param & GCS_COMPSTR))
-		{
-			std::wstring composition = IMEGetCompositionString(imm_context, false);
-			text_input_method_editor.SetComposition(RmlWin32::ConvertToUTF8(composition));
-		}
-
-		// The composition has been canceled.
-		if (!l_param)
-			text_input_method_editor.CancelComposition();
-
-		ImmReleaseContext(window_handle, imm_context);
-	}
-	break;
-	case WM_IME_CHAR:
-	case WM_IME_REQUEST:
-		// Ignore WM_IME_CHAR and WM_IME_REQUEST to block the system from appending the composition string.
-		result = false;
-		break;
-	default: break;
+			break;
+		case WM_IME_CHAR:
+		case WM_IME_REQUEST:
+			// Ignore WM_IME_CHAR and WM_IME_REQUEST to block the system from appending the composition string.
+			result = false;
+			break;
+		default: break;
 	}
 
 	return result;
@@ -410,7 +416,7 @@ int RmlWin32::GetKeyModifierState()
 // These are defined in winuser.h of MinGW 64 but are missing from MinGW 32
 // Visual Studio has them by default
 #if defined(__MINGW32__) && !defined(__MINGW64__)
-	#define VK_OEM_NEC_EQUAL 0x92
+#define VK_OEM_NEC_EQUAL 0x92
 	#define VK_OEM_FJ_JISHO 0x92
 	#define VK_OEM_FJ_MASSHOU 0x93
 	#define VK_OEM_FJ_TOUROKU 0x94
@@ -475,11 +481,11 @@ Rml::Input::KeyIdentifier RmlWin32::ConvertKey(int win32_key_code)
 		case VK_CAPITAL:             return Rml::Input::KI_CAPITAL;
 
 		case VK_KANA:                return Rml::Input::KI_KANA;
-		//case VK_HANGUL:              return Rml::Input::KI_HANGUL; /* overlaps with VK_KANA */
+			//case VK_HANGUL:              return Rml::Input::KI_HANGUL; /* overlaps with VK_KANA */
 		case VK_JUNJA:               return Rml::Input::KI_JUNJA;
 		case VK_FINAL:               return Rml::Input::KI_FINAL;
 		case VK_HANJA:               return Rml::Input::KI_HANJA;
-		//case VK_KANJI:               return Rml::Input::KI_KANJI; /* overlaps with VK_HANJA */
+			//case VK_KANJI:               return Rml::Input::KI_KANJI; /* overlaps with VK_HANJA */
 
 		case VK_ESCAPE:              return Rml::Input::KI_ESCAPE;
 
@@ -557,7 +563,7 @@ Rml::Input::KeyIdentifier RmlWin32::ConvertKey(int win32_key_code)
 
 		case VK_OEM_NEC_EQUAL:       return Rml::Input::KI_OEM_NEC_EQUAL;
 
-		//case VK_OEM_FJ_JISHO:        return Rml::Input::KI_OEM_FJ_JISHO; /* overlaps with VK_OEM_NEC_EQUAL */
+			//case VK_OEM_FJ_JISHO:        return Rml::Input::KI_OEM_FJ_JISHO; /* overlaps with VK_OEM_NEC_EQUAL */
 		case VK_OEM_FJ_MASSHOU:      return Rml::Input::KI_OEM_FJ_MASSHOU;
 		case VK_OEM_FJ_TOUROKU:      return Rml::Input::KI_OEM_FJ_TOUROKU;
 		case VK_OEM_FJ_LOYA:         return Rml::Input::KI_OEM_FJ_LOYA;
@@ -625,7 +631,7 @@ Rml::Input::KeyIdentifier RmlWin32::ConvertKey(int win32_key_code)
 }
 
 TextInputMethodEditor_Win32::TextInputMethodEditor_Win32() :
-	input_context(nullptr), composing(false), cursor_pos(-1), composition_range_start(0), composition_range_end(0)
+		input_context(nullptr), composing(false), cursor_pos(-1), composition_range_start(0), composition_range_end(0)
 {}
 
 void TextInputMethodEditor_Win32::OnActivate(Rml::TextInputContext* _input_context)

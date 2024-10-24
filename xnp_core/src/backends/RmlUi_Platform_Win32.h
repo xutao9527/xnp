@@ -29,7 +29,6 @@
 #ifndef RMLUI_BACKENDS_PLATFORM_WIN32_H
 #define RMLUI_BACKENDS_PLATFORM_WIN32_H
 
-
 #include "RmlUi_Include_Windows.h"
 #include <RmlUi/Core/Input.h>
 #include <RmlUi/Core/StringUtilities.h>
@@ -38,7 +37,6 @@
 #include <RmlUi/Core/Types.h>
 #include <string>
 
-class XnpWin32VKContext;
 class SystemInterface_Win32 : public Rml::SystemInterface {
 public:
 	SystemInterface_Win32();
@@ -46,8 +44,9 @@ public:
 
 	// Optionally, provide or change the window to be used for setting the mouse cursor, clipboard text and IME position.
 	void SetWindow(HWND window_handle);
-    void SetParent(XnpWin32VKContext* parentPtr);
+
 	// -- Inherited from Rml::SystemInterface  --
+
 	double GetElapsedTime() override;
 
 	void SetMouseCursor(const Rml::String& cursor_name) override;
@@ -57,14 +56,8 @@ public:
 
 	void ActivateKeyboard(Rml::Vector2f caret_position, float line_height) override;
 
-    void ActivateKeyboard();
-
 private:
-    Rml::Vector2f caret_position;
-    float line_height;
-    XnpWin32VKContext* parent;
-
-    HWND window_handle = nullptr;
+	HWND window_handle = nullptr;
 
 	double time_frequency = {};
 	LARGE_INTEGER time_startup = {};
@@ -86,19 +79,19 @@ class TextInputMethodEditor_Win32;
 namespace RmlWin32 {
 
 // Convenience helpers for converting between RmlUi strings (UTF-8) and Windows strings (UTF-16).
-Rml::String ConvertToUTF8(const std::wstring& wstr);
-std::wstring ConvertToUTF16(const Rml::String& str);
+	Rml::String ConvertToUTF8(const std::wstring& wstr);
+	std::wstring ConvertToUTF16(const Rml::String& str);
 
 // Window event handler to submit default input behavior to the context.
 // @return True if the event is still propagating, false if it was handled by the context.
-bool WindowProcedure(Rml::Context* context, TextInputMethodEditor_Win32& text_input_method_editor, HWND window_handle, UINT message, WPARAM w_param,
-	LPARAM l_param);
+	bool WindowProcedure(Rml::Context* context, TextInputMethodEditor_Win32& text_input_method_editor, HWND window_handle, UINT message, WPARAM w_param,
+						 LPARAM l_param);
 
 // Converts the key from Win32 key code to RmlUi key.
-Rml::Input::KeyIdentifier ConvertKey(int win32_key_code);
+	Rml::Input::KeyIdentifier ConvertKey(int win32_key_code);
 
 // Returns the active RmlUi key modifier state.
-int GetKeyModifierState();
+	int GetKeyModifierState();
 
 } // namespace RmlWin32
 

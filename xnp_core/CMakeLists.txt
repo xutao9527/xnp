@@ -2,6 +2,7 @@ project(xnp-core)
 
 find_package(RmlUi QUIET)
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(OpenGL REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -17,15 +18,21 @@ set(SHELL_SOURCES
 set(BACKENDS_SOURCES
         src/backends/RmlUi_Platform_Win32.h
         src/backends/RmlUi_Platform_Win32.cpp
-        src/backends/RmlUi_Renderer_VK.h
-        src/backends/RmlUi_Renderer_VK.cpp
-        src/backends/RmlUi_Include_Vulkan.h
-        src/backends/RmlUi_Include_Windows.h
+#        src/backends/RmlUi_Renderer_VK.h
+#        src/backends/RmlUi_Renderer_VK.cpp
+#        src/backends/RmlUi_Include_Vulkan.h
+#        src/backends/RmlUi_Include_Windows.h
+        src/backends/RmlUi_Renderer_GL2.cpp
+        src/backends/RmlUi_Renderer_GL2.h
 )
 
 set(CODE_SOURCES
-        src/renderer/XnpWin32VKContext.h
-        src/renderer/XnpWin32VKContext.cpp
+#        src/renderer/XnpWin32VKContext.h
+#        src/renderer/XnpWin32VKContext.cpp
+        src/rml/OpenGLWidget.cpp
+        src/rml/OpenGLWidget.h
+        src/rml/XnpQWidget.cpp
+        src/rml/XnpQWidget.h
 )
 
 add_library(${PROJECT_NAME}
@@ -39,12 +46,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        Qt5::Core
         Qt5::Widgets
+        OpenGL::GL
         RmlUi::RmlUi
         imm32
 )
 
+target_include_directories(${PROJECT_NAME} PUBLIC src/rml)
 target_include_directories(${PROJECT_NAME} PUBLIC src/backends)
 target_include_directories(${PROJECT_NAME} PUBLIC src/renderer)
 target_include_directories(${PROJECT_NAME} PUBLIC src/shell)
