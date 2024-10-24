@@ -14,13 +14,18 @@ set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install/${CMAKE_BUILD_TYPE}")
 ## 清空搜索库路径
 #set(CMAKE_PREFIX_PATH "")
 ## 设置搜索库路径
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${CMAKE_INSTALL_PREFIX}")
+set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX};${CMAKE_PREFIX_PATH}")
 
 # 安装第三方库
-#add_subdirectory(3rdparty)
-# xnp_core
-add_subdirectory(xnp_core)
-# xnp_dealer
-add_subdirectory(xnp_dealer)
+add_subdirectory(3rdparty)
+
+find_package(RmlUi REQUIRED)
+# 打印 RmlUi 库的路径
+message(STATUS "RmlUi include dirs: ${RmlUi_INCLUDE_DIRS}")
+message(STATUS "RmlUi libraries: ${RmlUi_LIBRARIES}")
+## xnp_core
+#add_subdirectory(xnp_core)
+## xnp_dealer
+#add_subdirectory(xnp_dealer)
 
 
