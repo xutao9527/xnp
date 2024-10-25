@@ -40,7 +40,7 @@
 class SystemInterface_Win32 : public Rml::SystemInterface {
 public:
 	SystemInterface_Win32();
-	~SystemInterface_Win32();
+	~SystemInterface_Win32() override;
 
 	// Optionally, provide or change the window to be used for setting the mouse cursor, clipboard text and IME position.
 	void SetWindow(HWND window_handle);

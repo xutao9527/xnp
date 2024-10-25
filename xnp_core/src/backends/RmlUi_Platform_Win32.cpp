@@ -28,6 +28,7 @@
 
 #include "RmlUi_Platform_Win32.h"
 #include "RmlUi_Include_Windows.h"
+#include "XnpWinGLWidget.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Core.h>
 #include <RmlUi/Core/Input.h>
@@ -636,11 +637,14 @@ TextInputMethodEditor_Win32::TextInputMethodEditor_Win32() :
 
 void TextInputMethodEditor_Win32::OnActivate(Rml::TextInputContext* _input_context)
 {
+    XnpWinGLWidget::update_flag = true;
 	input_context = _input_context;
 }
 
 void TextInputMethodEditor_Win32::OnDeactivate(Rml::TextInputContext* _input_context)
 {
+    XnpWinGLWidget::update_flag = false;
+    XnpWinGLWidget::force_update_flag = true;
 	if (input_context == _input_context)
 		input_context = nullptr;
 }

@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include <QDebug>
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QTimer>
 #include <QScreen>
 #include <QGuiApplication>
+#include <QElapsedTimer>
 
 #include "Shell.h"
 #include <RmlUi/Core.h>
@@ -15,7 +17,10 @@
 
 class XnpWinGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
-    static std::once_flag initFlag;
+public:
+    static std::once_flag init_flag;
+    static std::atomic<bool> update_flag;
+    static std::atomic<bool> force_update_flag;
     static std::atomic<int> ref_count;
 
     SystemInterface_Win32 system_interface;
@@ -25,11 +30,13 @@ class XnpWinGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Rml::Context *context = nullptr;
 
     QTimer* update_timer = nullptr;
+    QElapsedTimer render_timer;
+    int render_interval;
     HWND window_handle = nullptr;
 public:
     explicit XnpWinGLWidget(QWidget *parent = nullptr) : QOpenGLWidget(parent) {
         // 线程安全，只执行一次
-        std::call_once(initFlag, [this]() {
+        std::call_once(init_flag, [this]() {
             Rml::Initialise();
             Shell::Initialize();
             Shell::LoadFonts();
@@ -68,15 +75,36 @@ protected:
         QScreen* screen = QGuiApplication::primaryScreen();
         if (screen) {
             qreal refreshRate =  screen->refreshRate();
-            int interval = static_cast<int>(1000 / refreshRate);  // 将刷新率转换为毫秒间隔
+            render_interval = static_cast<int>(1000 / refreshRate);  // 将刷新率转换为毫秒间隔
             update_timer = new QTimer(this);
-            connect(update_timer, &QTimer::timeout, this, QOverload<>::of(&QOpenGLWidget::update));
+            //connect(update_timer, &QTimer::timeout, this, QOverload<>::of(&QOpenGLWidget::update));
+            connect(update_timer, &QTimer::timeout, this,  [this]() { Render(); });
             update_timer->setTimerType(Qt::PreciseTimer);
-            //update_timer->start(interval); // 根据刷新率设置定时器间隔
+            update_timer->setInterval(render_interval);
+            update_timer->start();
         }
     }
 
-    // 渲染场景
+    void Render(bool event_flag = false)
+    {
+        if (force_update_flag) {
+            force_update_flag = false;
+            update();
+            return;
+        }
+        if (!render_timer.isValid()) {
+            render_timer.start();
+        }
+        qint64 interval = render_timer.restart();
+        if (interval < render_interval) {
+            return;
+        }
+        if (event_flag||update_flag) {
+            update();
+        }
+    }
+
+     // 渲染场景
     [[maybe_unused]] void paintGL() override {
         context->Update();
         render_interface.BeginFrame();
@@ -88,6 +116,7 @@ protected:
     [[maybe_unused]] bool nativeEvent(const QByteArray &eventType, void *message, long *result) override {
         MSG *msg = static_cast<MSG *>(message);
         ProcessEvents(msg);
+        Render(true);
         if (msg->message == WM_IME_STARTCOMPOSITION ||
             msg->message == WM_IME_ENDCOMPOSITION ||
             msg->message == WM_IME_COMPOSITION ||
