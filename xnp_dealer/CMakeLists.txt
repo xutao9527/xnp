@@ -18,9 +18,9 @@ set(CODE_SOURCES
 #qt5_add_resources(RESOURCES ${RESOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-)
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+#)
 target_link_libraries(${PROJECT_NAME}
         xnp-core
 

@@ -32,15 +32,15 @@ add_library(${PROJECT_NAME}
         ${BACKENDS_SOURCES}
         ${CODE_SOURCES}
 )
-set_target_properties(${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-)
+#set_target_properties(${PROJECT_NAME} PROPERTIES
+#        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+#)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC
+        RmlUi::RmlUi
         Qt5::Widgets
         OpenGL::GL
-        RmlUi::RmlUi
         imm32
 )
 
