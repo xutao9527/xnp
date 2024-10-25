@@ -1,7 +1,8 @@
 #include "ShellFileInterface.h"
 #include <cstdio>
+#include <utility>
 
-ShellFileInterface::ShellFileInterface(const Rml::String& root) : root(root) {}
+ShellFileInterface::ShellFileInterface(Rml::String  root) : root(std::move(root)) {}
 
 ShellFileInterface::~ShellFileInterface() = default;
 

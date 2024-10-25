@@ -39,7 +39,7 @@ add_custom_target(copy_dependencies ALL
         "${PROJECT_SOURCE_DIR}/resources/font" "${CMAKE_CURRENT_BINARY_DIR}/resources/font"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/resources/layout" "${CMAKE_CURRENT_BINARY_DIR}/resources/layout"
-        COMMENT "Copying Qt DLLs to the build directory"
+        COMMENT "Copying resources to the build directory"
         VERBATIM
 )
 add_dependencies(${PROJECT_NAME} copy_dependencies)

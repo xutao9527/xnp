@@ -13,7 +13,7 @@
 
 class ShellFileInterface : public Rml::FileInterface {
 public:
-	ShellFileInterface(const Rml::String& root);
+	explicit ShellFileInterface(Rml::String  root);
 	~ShellFileInterface() override;
 
 	/// Opens a file.
