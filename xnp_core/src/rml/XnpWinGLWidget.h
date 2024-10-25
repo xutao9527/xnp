@@ -3,6 +3,8 @@
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QTimer>
+#include <QScreen>
+#include <QGuiApplication>
 
 #include "Shell.h"
 #include <RmlUi/Core.h>
@@ -14,7 +16,7 @@
 class XnpWinGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
 {
     static std::once_flag initFlag;
-    static std::atomic<int> ref_count;  // 静态引用计数器
+    static std::atomic<int> ref_count;
 
     SystemInterface_Win32 system_interface;
     RenderInterface_GL2 render_interface;
@@ -22,6 +24,7 @@ class XnpWinGLWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Rml::Vector2i window_dimensions;
     Rml::Context *context = nullptr;
 
+    QTimer* update_timer = nullptr;
     HWND window_handle = nullptr;
 public:
     explicit XnpWinGLWidget(QWidget *parent = nullptr) : QOpenGLWidget(parent) {
@@ -33,7 +36,7 @@ public:
             Rml::SetTextInputHandler(&text_input_method_editor);
         });
         ++ref_count;
-
+        QOpenGLWidget::setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
     }
 
     ~XnpWinGLWidget() override{
@@ -49,7 +52,8 @@ public:
 
 protected:
     // 初始化 OpenGL 环境
-    void initializeGL() override {
+    [[maybe_unused]] void initializeGL() override {
+        // 设置 OpenGL 格式，启用垂直同步
         initializeOpenGLFunctions();
         Rml::SetSystemInterface(&system_interface);
         window_handle = reinterpret_cast<HWND>(this->winId());
@@ -61,13 +65,19 @@ protected:
         Rml::ElementDocument *document = context->LoadDocument("resources/layout/login.rml");
         document->Show();
 
-        auto *timer = new QTimer(this);
-        connect(timer, &QTimer::timeout, this, QOverload<>::of(&QOpenGLWidget::update));
-        timer->start(16); // 每16毫秒调用一次，即大约每秒60帧
+        QScreen* screen = QGuiApplication::primaryScreen();
+        if (screen) {
+            qreal refreshRate =  screen->refreshRate();
+            int interval = static_cast<int>(1000 / refreshRate);  // 将刷新率转换为毫秒间隔
+            update_timer = new QTimer(this);
+            connect(update_timer, &QTimer::timeout, this, QOverload<>::of(&QOpenGLWidget::update));
+            update_timer->setTimerType(Qt::PreciseTimer);
+            //update_timer->start(interval); // 根据刷新率设置定时器间隔
+        }
     }
 
     // 渲染场景
-    void paintGL() override {
+    [[maybe_unused]] void paintGL() override {
         context->Update();
         render_interface.BeginFrame();
         render_interface.Clear();
@@ -75,7 +85,7 @@ protected:
         render_interface.EndFrame();
     }
 
-    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override {
+    [[maybe_unused]] bool nativeEvent(const QByteArray &eventType, void *message, long *result) override {
         MSG *msg = static_cast<MSG *>(message);
         ProcessEvents(msg);
         if (msg->message == WM_IME_STARTCOMPOSITION ||
