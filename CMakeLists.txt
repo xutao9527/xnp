@@ -16,7 +16,7 @@ set(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/install/${CMAKE_BUILD_TYPE}")
 ## 设置搜索库路径
 set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX};${CMAKE_PREFIX_PATH}")
 
-# 安装第三方库
+# 3rdparty
 #add_subdirectory(3rdparty)
 ## xnp_core
 add_subdirectory(xnp_core)
