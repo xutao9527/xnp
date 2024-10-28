@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QFontDatabase>
+#include <QSettings>
 
 class DImageWidget : public QWidget
 {
@@ -28,12 +29,17 @@ public:
                 setFont(font);
             }
         }
-
-        line1 = "台号: 089"; // 设置要显示的文本
-        line2 = "台面限红/Table Limits"; // 设置要显示的文本
-        line3 = "单骰/:MIN 200-MAX 16500"; // 设置要显示的文本
-        line4 = "双骰/:MIN 200-MAX 7100"; // 设置要显示的文本
-        line5 = "围骰/:MIN 200-MAX 2000"; // 设置要显示的文本
+        QSettings settings("config.ini", QSettings::IniFormat);
+        line1 = settings.value("DisplaySettings/line1").toString();
+        line2 = settings.value("DisplaySettings/line2").toString();
+        line3 = settings.value("DisplaySettings/line3").toString();
+        line4 = settings.value("DisplaySettings/line4").toString();
+        line5 = settings.value("DisplaySettings/line5").toString();
+        // line1 = u8"台号: 089"; // 设置要显示的文本
+        // line2 = u8"台面限红/Table Limits"; // 设置要显示的文本
+        // line3 = u8"单骰/:MIN 200-MAX 16500"; // 设置要显示的文本
+        // line4 = u8"双骰/:MIN 200-MAX 7100"; // 设置要显示的文本
+        // line5 = u8"围骰/:MIN 200-MAX 2000"; // 设置要显示的文本
     }
 
     void setImage(const QString &path)

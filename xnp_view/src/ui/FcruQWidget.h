@@ -15,25 +15,16 @@ class FcruQWidget : public QWidget
 {
 Q_OBJECT
 private:
-    QStackedLayout  *layout;
+
     BImageWidget *bImageWidget;
     DImageWidget *dImageWidget;
 public:
     FcruQWidget() {
-        // layout = new QStackedLayout (this);
-        // layout->setContentsMargins(0, 0, 0, 0);
-        // layout->setSpacing(0);
-
         bImageWidget  = new BImageWidget(this);
         bImageWidget->setImage("resources/index.jpg");
-        //layout->addWidget(bImageWidget); // 将自定义控件添加到布局
 
         dImageWidget  = new DImageWidget(this);
         dImageWidget->setImage("resources/describe.png");
-
-        //layout->addWidget(dImageWidget); // 将自定义控件添加到布局
-
-        // setLayout(layout);
     }
 
 protected:

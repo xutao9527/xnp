@@ -26,6 +26,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 add_custom_target(copy_resources ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
+        COMMAND ${CMAKE_COMMAND} -E copy
+        "${PROJECT_SOURCE_DIR}/resources/config.ini" "${CMAKE_CURRENT_BINARY_DIR}"
         VERBATIM
 )
 add_dependencies(${PROJECT_NAME} copy_resources)
