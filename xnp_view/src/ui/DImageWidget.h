@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QPixmap>
+#include <QFontDatabase>
 
 class DImageWidget : public QWidget
 {
@@ -15,7 +16,19 @@ private:
     QString line4;   // 要显示的文本
     QString line5;   // 要显示的文本
 public:
-    explicit DImageWidget(QWidget *parent = nullptr) : QWidget(parent) {
+    explicit DImageWidget(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        // 加载自定义字体
+        int fontId = QFontDatabase::addApplicationFont("resources/ALIBABA-PUHUITI-HEAVY.TTF");
+        if (fontId != -1) {
+            QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
+            if (!fontFamilies.isEmpty()) {
+                // 使用加载的字体
+                QFont font(fontFamilies.at(0), 30);
+                setFont(font);
+            }
+        }
+
         line1 = "台号: 089"; // 设置要显示的文本
         line2 = "台面限红/Table Limits"; // 设置要显示的文本
         line3 = "单骰/:MIN 200-MAX 16500"; // 设置要显示的文本
@@ -39,26 +52,25 @@ protected:
             painter.drawPixmap(rect(), pixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
 
-        painter.setPen(Qt::white);
-        painter.setFont(QFont("Arial", 32));
-
+        painter.setFont(font());
+        painter.setPen(QPen(QColor(119, 91, 37), 1)); // 设置轮廓颜色和宽度
         QRect textRect = painter.boundingRect(rect(), Qt::AlignCenter | Qt::TextWordWrap, line1);
 
-        painter.drawText((width() - textRect.width()) / 2, 15 + textRect.height(), line1); // y + textRect.height() 用于在文字底部绘制
+        int offset = 3; // 偏移量，用于轮廓效果
+        // 绘制文本
+        painter.drawText((width() - textRect.width()) / 2, 15 + textRect.height(), line1);
+        painter.drawText(20 - offset, 80 + textRect.height() + offset, line2);
+        painter.drawText(20 - offset, 140 + textRect.height() + offset, line3);
+        painter.drawText(20 - offset, 200 + textRect.height() + offset, line4);
+        painter.drawText(20 - offset, 260 + textRect.height() + offset, line5);
 
-        painter.drawText(20, 90 + textRect.height(), line2);
-
-        painter.drawText(20, 150 + textRect.height(), line3);
-
-        painter.drawText(20, 210 + textRect.height(), line4);
-
-        painter.drawText(20, 270 + textRect.height(), line5);
-
-        // painter.drawText((width() - textRect.width()) / 2, 20 + textRect.height(), line1); // y + textRect.height() 用于在文字底部绘制
-        //
-        // painter.drawText((width() - textRect.width()) / 2, 20 + textRect.height(), line1); // y + textRect.height() 用于在文字底部绘制
-        //
-        // painter.drawText((width() - textRect.width()) / 2, 20 + textRect.height(), line1); // y + textRect.height() 用于在文字底部绘制
+        // 设置文本颜色
+        painter.setPen(Qt::white);
+        painter.drawText((width() - textRect.width()) / 2, 5 + textRect.height(),line1); // y + textRect.height() 用于在文字底部绘制
+        painter.drawText(20, 80 + textRect.height(), line2);
+        painter.drawText(20, 140 + textRect.height(), line3);
+        painter.drawText(20, 200 + textRect.height(), line4);
+        painter.drawText(20, 260 + textRect.height(), line5);
     }
 };
 
