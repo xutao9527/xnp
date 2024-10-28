@@ -64,7 +64,7 @@ protected:
 
         int offset = 3; // 偏移量，用于轮廓效果
         // 绘制文本
-        painter.drawText((width() - textRect.width()) / 2, 15 + textRect.height(), line1);
+        painter.drawText((width() - textRect.width()) / 2  - offset, 5 + textRect.height() + offset+3, line1);
         painter.drawText(20 - offset, 80 + textRect.height() + offset, line2);
         painter.drawText(20 - offset, 140 + textRect.height() + offset, line3);
         painter.drawText(20 - offset, 200 + textRect.height() + offset, line4);
