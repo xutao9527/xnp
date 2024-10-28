@@ -2,16 +2,16 @@
 #include <QVBoxLayout>
 #include <QIcon>
 #include <QWidget>
-#include <fcntl.h>
-#include <io.h>
+#include "ui/FcruQWidget.h"
 
 
 int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
-    QWidget window;
-    window.setWindowTitle(u8"游戏引擎");  // 设置窗口标题
-    window.resize(512, 384); // 设置窗口大小
-    window.show();
+    FcruQWidget fcruQWidget;
+
+    fcruQWidget.setWindowTitle(u8"鱼虾蟹");  // 设置窗口标题
+    fcruQWidget.resize(1600, 900); // 设置窗口大小
+    fcruQWidget.show();
     return app.exec();
 }

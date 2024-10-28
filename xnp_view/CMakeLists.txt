@@ -1,7 +1,7 @@
 # 设置项目名称
 project(xnp_view LANGUAGES CXX)
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets )
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -9,6 +9,12 @@ set(CMAKE_AUTOUIC ON)
 
 set(CODE_SOURCES
         src/main.cpp
+        src/ui/FcruQWidget.cpp
+        src/ui/FcruQWidget.h
+        src/ui/BImageWidget.cpp
+        src/ui/BImageWidget.h
+        src/ui/DImageWidget.cpp
+        src/ui/DImageWidget.h
 )
 
 add_executable(${PROJECT_NAME} ${CODE_SOURCES})
@@ -16,3 +22,10 @@ add_executable(${PROJECT_NAME} ${CODE_SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         Qt5::Widgets
 )
+
+add_custom_target(copy_resources ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/resources" "${CMAKE_CURRENT_BINARY_DIR}/resources"
+        VERBATIM
+)
+add_dependencies(${PROJECT_NAME} copy_resources)
