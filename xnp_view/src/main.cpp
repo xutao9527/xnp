@@ -1,9 +1,6 @@
 ﻿#include <QApplication>
-#include <QVBoxLayout>
 #include <QIcon>
-#include <QWidget>
 #include "ui/FcruQWidget.h"
-
 
 int main(int argc, char *argv[]) {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
