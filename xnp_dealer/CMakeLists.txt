@@ -23,8 +23,8 @@ add_executable(${PROJECT_NAME} ${CODE_SOURCES} resources.rc)
 #)
 target_link_libraries(${PROJECT_NAME}
         xnp-core
-
 )
+
 target_include_directories(${PROJECT_NAME} PUBLIC src)
 target_include_directories(${PROJECT_NAME} PUBLIC src/ui)
 target_include_directories(${PROJECT_NAME} PUBLIC src/rml)
