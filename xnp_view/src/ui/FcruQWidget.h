@@ -8,8 +8,11 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QStackedLayout>
+#include <QMenu>
 #include "BImageWidget.h"
 #include "DImageWidget.h"
+#include <QApplication>
+#include <QTimer>
 
 class FcruQWidget : public QWidget
 {
@@ -25,6 +28,8 @@ public:
 
         dImageWidget  = new DImageWidget(this);
         dImageWidget->setImage("resources/describe.png");
+        // 使用 QTimer 延迟全屏显示
+        QTimer::singleShot(0, this, &FcruQWidget::showFullScreen);
     }
 
 protected:
@@ -46,6 +51,13 @@ protected:
         QWidget::keyPressEvent(event);
     }
 
+    void contextMenuEvent(QContextMenuEvent *event) override {
+        QMenu menu(this);
+        QAction *exitAction = menu.addAction(u8"退出");
+        connect(exitAction, &QAction::triggered, this, &FcruQWidget::quitApplication);
+        menu.exec(event->globalPos());
+    }
+
 private slots:
     void toggleFullScreen() {
         if (isFullScreen()) {
@@ -53,6 +65,10 @@ private slots:
         } else {
             showFullScreen();
         }
+    }
+
+    void quitApplication() {
+        QApplication::quit();
     }
 };
 
