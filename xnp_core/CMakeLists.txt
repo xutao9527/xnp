@@ -25,6 +25,7 @@ set(BACKENDS_SOURCES
 set(CODE_SOURCES
         src/rml/XnpWinGLWidget.cpp
         src/rml/XnpWinGLWidget.h
+        ../xnp_tun/src/main.cpp
 )
 
 add_library(${PROJECT_NAME}

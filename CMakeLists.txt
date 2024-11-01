@@ -18,10 +18,11 @@ set(CMAKE_PREFIX_PATH "${CMAKE_INSTALL_PREFIX};${CMAKE_PREFIX_PATH}")
 
 # 3rdparty
 #add_subdirectory(3rdparty)
-## xnp_core
-add_subdirectory(xnp_core)
-## xnp_dealer
-add_subdirectory(xnp_dealer)
-## xnp_view
-add_subdirectory(xnp_view)
-
+# xnp_core
+#add_subdirectory(xnp_core)
+# xnp_dealer
+#add_subdirectory(xnp_dealer)
+# xnp_view
+#add_subdirectory(xnp_view)
+#xnp_tun
+add_subdirectory(xnp_tun)
