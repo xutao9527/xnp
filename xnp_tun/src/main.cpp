@@ -115,8 +115,7 @@ static void Log(_In_ WINTUN_LOGGER_LEVEL Level, _In_z_ const WCHAR *Format, ...)
 static HANDLE QuitEvent;
 static volatile BOOL HaveQuit;
 
-static BOOL WINAPI
-CtrlHandler(_In_ DWORD CtrlType)
+static BOOL WINAPI CtrlHandler(_In_ DWORD CtrlType)
 {
     switch (CtrlType) {
         case CTRL_C_EVENT:
