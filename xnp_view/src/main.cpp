@@ -1,5 +1,4 @@
 ﻿#include <QApplication>
-#include <QIcon>
 #include "ui/FcruQWidget.h"
 
 int main(int argc, char *argv[]) {
