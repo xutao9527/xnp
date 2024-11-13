@@ -1,7 +1,9 @@
 # 设置项目名称
 project(xnp_mcall LANGUAGES CXX)
 
-find_package(Qt5 REQUIRED COMPONENTS Core  Quick)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Qt5 REQUIRED COMPONENTS Quick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
