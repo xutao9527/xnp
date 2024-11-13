@@ -1,7 +1,7 @@
 # 设置项目名称
 project(xnp_mcall LANGUAGES CXX)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Qml Quick)
+find_package(Qt5 REQUIRED COMPONENTS Core  Quick)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -20,7 +20,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         ICON "resources/img/nim.ico"
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        Qt5::Core Qt5::Qml Qt5::Quick
+        Qt5::Core  Qt5::Quick
 )
 
 #add_custom_target(copy_${PROJECT_NAME}_resources ALL
