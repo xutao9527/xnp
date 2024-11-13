@@ -1,13 +1,10 @@
-﻿#include <QApplication>
-#include <QWidget>
+﻿#include <QQmlApplicationEngine>
+#include <QGuiApplication>
 
 
 int main(int argc, char *argv[]) {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication app(argc, argv);
-    QWidget widget;
-    widget.setWindowTitle(u8"鱼虾蟹");  // 设置窗口标题
-    widget.resize(1600, 900); // 设置窗口大小
-    widget.show();
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+    engine.load(QUrl(QStringLiteral("qrc:/ui/login.qml")));
     return app.exec();
 }
