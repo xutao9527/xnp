@@ -22,7 +22,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         ICON "resources/img/nim.ico"
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        Qt5::Core  Qt5::Quick
+        Qt5::Core Qt5::Quick
 )
 
 #add_custom_target(copy_${PROJECT_NAME}_resources ALL
